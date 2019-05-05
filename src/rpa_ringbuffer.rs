@@ -16,7 +16,7 @@ pub fn initialize_ring_buffer(
                                                    data_ptr.inner) as i32
   };
   if rb_init_ans == -1 {
-    Err(RingBufferError::NotPower2)
+    return Err(RingBufferError::NotPower2("Ring buffer size is not power of 2."));
   }
 
   let rpa_ringbuffer = PaUtilRingBuffer {
