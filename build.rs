@@ -31,7 +31,7 @@ fn main() {
 
 
   let bindings = bindgen::Builder::default()
-    .header("pa_include/pa_util.h")
+    .header("pa_include/pa_ringbuffer.h")
     .enable_cxx_namespaces()
     .layout_tests(false)
     .generate()
@@ -47,11 +47,10 @@ fn main() {
     .header("pa_include/pa_util.h")
     .enable_cxx_namespaces()
     .layout_tests(false)
-    .whitelist_type("PaUtilHostApiRepresentation")
-    .whitelist_function("PaUtil_GetHostApiRepresentation")
-    .whitelist_function("PaUtil_DeviceIndexToHostApiDeviceIndex")
+//    .whitelist_type("PaUtilHostApiRepresentation")
     .whitelist_function("PaUtil_SetLastHostErrorInfo")
     .whitelist_function("PaUtil_AllocateMemory")
+    .whitelist_function("PaUtil_FreeMemory")
     .whitelist_function("PaUtil_CountCurrentlyAllocatedBlocks")
     .whitelist_function("PaUtil_InitializeClock")
     .whitelist_function("PaUtil_GetTime")

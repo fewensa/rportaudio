@@ -4,15 +4,6 @@
 pub mod root {
     #[allow(unused_imports)]
     use self::super::root;
-    #[doc = " Error codes returned by PortAudio functions."]
-    #[doc = "Note that with the exception of paNoError, all PaErrorCodes are negative."]
-    pub type PaError = ::std::os::raw::c_int;
-    #[doc = " The type used to refer to audio devices. Values of this type usually"]
-    #[doc = "range from 0 to (Pa_GetDeviceCount()-1), and may also take on the PaNoDevice"]
-    #[doc = "and paUseHostApiSpecificDeviceSpecification values."]
-    #[doc = ""]
-    #[doc = "@see Pa_GetDeviceCount, paNoDevice, paUseHostApiSpecificDeviceSpecification"]
-    pub type PaDeviceIndex = ::std::os::raw::c_int;
     pub const PaHostApiTypeId_paInDevelopment: root::PaHostApiTypeId = 0;
     pub const PaHostApiTypeId_paDirectSound: root::PaHostApiTypeId = 1;
     pub const PaHostApiTypeId_paMME: root::PaHostApiTypeId = 2;
@@ -38,45 +29,6 @@ pub mod root {
     #[doc = ""]
     #[doc = "@see PaHostApiInfo"]
     pub type PaHostApiTypeId = u32;
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
-    pub struct PaUtilHostApiRepresentation {
-        _unused: [u8; 0],
-    }
-    extern "C" {
-        #[doc = " Retrieve a specific host API representation. This function can be used"]
-        #[doc = "by implementations to retrieve a pointer to their representation in"]
-        #[doc = "host api specific extension functions which aren't passed a rep pointer"]
-        #[doc = "by pa_front.c."]
-        #[doc = ""]
-        #[doc = "@param hostApi A pointer to a host API represenation pointer. Apon success"]
-        #[doc = "this will receive the requested representation pointer."]
-        #[doc = ""]
-        #[doc = "@param type A valid host API type identifier."]
-        #[doc = ""]
-        #[doc = "@returns An error code. If the result is PaNoError then a pointer to the"]
-        #[doc = "requested host API representation will be stored in *hostApi. If the host API"]
-        #[doc = "specified by type is not found, this function returns paHostApiNotFound."]
-        pub fn PaUtil_GetHostApiRepresentation(
-            hostApi: *mut *mut root::PaUtilHostApiRepresentation,
-            type_: root::PaHostApiTypeId,
-        ) -> root::PaError;
-    }
-    extern "C" {
-        #[doc = " Convert a PortAudio device index into a host API specific device index."]
-        #[doc = "@param hostApiDevice Pointer to a device index, on success this will recieve the"]
-        #[doc = "converted device index value."]
-        #[doc = "@param device The PortAudio device index to convert."]
-        #[doc = "@param hostApi The host api which the index should be converted for."]
-        #[doc = ""]
-        #[doc = "@returns On success returns PaNoError and places the converted index in the"]
-        #[doc = "hostApiDevice parameter."]
-        pub fn PaUtil_DeviceIndexToHostApiDeviceIndex(
-            hostApiDevice: *mut root::PaDeviceIndex,
-            device: root::PaDeviceIndex,
-            hostApi: *mut root::PaUtilHostApiRepresentation,
-        ) -> root::PaError;
-    }
     extern "C" {
         #[doc = " Set the host error information returned by Pa_GetLastHostErrorInfo. This"]
         #[doc = "function and the paUnanticipatedHostError error code should be used as a"]
@@ -101,6 +53,10 @@ pub mod root {
     extern "C" {
         #[doc = " Allocate size bytes, guaranteed to be aligned to a FIXME byte boundary"]
         pub fn PaUtil_AllocateMemory(size: ::std::os::raw::c_long) -> *mut ::std::os::raw::c_void;
+    }
+    extern "C" {
+        #[doc = " Realease block if non-NULL. block may be NULL"]
+        pub fn PaUtil_FreeMemory(block: *mut ::std::os::raw::c_void);
     }
     extern "C" {
         #[doc = " Return the number of currently allocated blocks. This function can be"]

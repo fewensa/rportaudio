@@ -2,17 +2,21 @@
 extern crate bitflags;
 extern crate libc;
 
+//use crate::pa_include::portaudio::root as raw_portaudio;
+use portaudio_sys as raw_portaudio;
+use crate::pa_include::pa_ringbuffer::root as raw_pa_ringbuffer;
+use crate::pa_include::pa_util::root as raw_pa_util;
 
-//pub(self) use crate::pa_include::portaudio::root as raw_portaudio;
-pub(self) use portaudio_sys as raw_portaudio;
 
-pub(self) mod pa_include;
+pub use rportaudio::*;
+
 
 pub mod types;
+pub mod rpa_util;
+pub mod rpa_ringbuffer;
+pub mod rpa_error;
 
-mod rpa_error;
-mod rpa_linux_alsa;
-mod rpa_ringbuffer;
-mod rpa_util;
+mod pa_include;
 mod rportaudio;
+mod rpa_linux_alsa;
 mod kit;

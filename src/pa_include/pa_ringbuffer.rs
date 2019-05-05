@@ -4,1033 +4,185 @@
 pub mod root {
     #[allow(unused_imports)]
     use self::super::root;
-    pub const paFormatIsSupported: u32 = 0;
-    pub const paFramesPerBufferUnspecified: u32 = 0;
-    extern "C" {
-        #[doc = " Retrieve the release number of the currently running PortAudio build."]
-        #[doc = "For example, for version \"19.5.1\" this will return 0x00130501."]
-        #[doc = ""]
-        #[doc = "@see paMakeVersionNumber"]
-        pub fn Pa_GetVersion() -> ::std::os::raw::c_int;
-    }
-    extern "C" {
-        #[doc = " Retrieve a textual description of the current PortAudio build,"]
-        #[doc = "e.g. \"PortAudio V19.5.0-devel, revision 1952M\"."]
-        #[doc = "The format of the text may change in the future. Do not try to parse the"]
-        #[doc = "returned string."]
-        #[doc = ""]
-        #[doc = "@deprecated As of 19.5.0, use Pa_GetVersionInfo()->versionText instead."]
-        pub fn Pa_GetVersionText() -> *const ::std::os::raw::c_char;
-    }
-    #[doc = "A structure containing PortAudio API version information."]
-    #[doc = "@see Pa_GetVersionInfo, paMakeVersionNumber"]
-    #[doc = "@version Available as of 19.5.0."]
+    pub type ring_buffer_size_t = ::std::os::raw::c_long;
     #[repr(C)]
     #[derive(Debug, Copy, Clone)]
-    pub struct PaVersionInfo {
-        pub versionMajor: ::std::os::raw::c_int,
-        pub versionMinor: ::std::os::raw::c_int,
-        pub versionSubMinor: ::std::os::raw::c_int,
-        #[doc = "This is currently the Git revision hash but may change in the future."]
-        #[doc = "The versionControlRevision is updated by running a script before compiling the library."]
-        #[doc = "If the update does not occur, this value may refer to an earlier revision."]
-        pub versionControlRevision: *const ::std::os::raw::c_char,
-        #[doc = " Version as a string, for example \"PortAudio V19.5.0-devel, revision 1952M\""]
-        pub versionText: *const ::std::os::raw::c_char,
+    pub struct PaUtilRingBuffer {
+        #[doc = "< Number of elements in FIFO. Power of 2. Set by PaUtil_InitRingBuffer."]
+        pub bufferSize: root::ring_buffer_size_t,
+        #[doc = "< Index of next writable element. Set by PaUtil_AdvanceRingBufferWriteIndex."]
+        pub writeIndex: root::ring_buffer_size_t,
+        #[doc = "< Index of next readable element. Set by PaUtil_AdvanceRingBufferReadIndex."]
+        pub readIndex: root::ring_buffer_size_t,
+        #[doc = "< Used for wrapping indices with extra bit to distinguish full/empty."]
+        pub bigMask: root::ring_buffer_size_t,
+        #[doc = "< Used for fitting indices to buffer."]
+        pub smallMask: root::ring_buffer_size_t,
+        #[doc = "< Number of bytes per element."]
+        pub elementSizeBytes: root::ring_buffer_size_t,
+        #[doc = "< Pointer to the buffer containing the actual data."]
+        pub buffer: *mut ::std::os::raw::c_char,
     }
     extern "C" {
-        #[doc = " Retrieve version information for the currently running PortAudio build."]
-        #[doc = "@return A pointer to an immutable PaVersionInfo structure."]
+        #[doc = " Initialize Ring Buffer to empty state ready to have elements written to it."]
         #[doc = ""]
-        #[doc = "@note This function can be called at any time. It does not require PortAudio"]
-        #[doc = "to be initialized. The structure pointed to is statically allocated. Do not"]
-        #[doc = "attempt to free it or modify it."]
+        #[doc = "@param rbuf The ring buffer."]
         #[doc = ""]
-        #[doc = "@see PaVersionInfo, paMakeVersionNumber"]
-        #[doc = "@version Available as of 19.5.0."]
-        pub fn Pa_GetVersionInfo() -> *const root::PaVersionInfo;
-    }
-    #[doc = " Error codes returned by PortAudio functions."]
-    #[doc = "Note that with the exception of paNoError, all PaErrorCodes are negative."]
-    pub type PaError = ::std::os::raw::c_int;
-    pub const PaErrorCode_paNoError: root::PaErrorCode = 0;
-    pub const PaErrorCode_paNotInitialized: root::PaErrorCode = -10000;
-    pub const PaErrorCode_paUnanticipatedHostError: root::PaErrorCode = -9999;
-    pub const PaErrorCode_paInvalidChannelCount: root::PaErrorCode = -9998;
-    pub const PaErrorCode_paInvalidSampleRate: root::PaErrorCode = -9997;
-    pub const PaErrorCode_paInvalidDevice: root::PaErrorCode = -9996;
-    pub const PaErrorCode_paInvalidFlag: root::PaErrorCode = -9995;
-    pub const PaErrorCode_paSampleFormatNotSupported: root::PaErrorCode = -9994;
-    pub const PaErrorCode_paBadIODeviceCombination: root::PaErrorCode = -9993;
-    pub const PaErrorCode_paInsufficientMemory: root::PaErrorCode = -9992;
-    pub const PaErrorCode_paBufferTooBig: root::PaErrorCode = -9991;
-    pub const PaErrorCode_paBufferTooSmall: root::PaErrorCode = -9990;
-    pub const PaErrorCode_paNullCallback: root::PaErrorCode = -9989;
-    pub const PaErrorCode_paBadStreamPtr: root::PaErrorCode = -9988;
-    pub const PaErrorCode_paTimedOut: root::PaErrorCode = -9987;
-    pub const PaErrorCode_paInternalError: root::PaErrorCode = -9986;
-    pub const PaErrorCode_paDeviceUnavailable: root::PaErrorCode = -9985;
-    pub const PaErrorCode_paIncompatibleHostApiSpecificStreamInfo: root::PaErrorCode = -9984;
-    pub const PaErrorCode_paStreamIsStopped: root::PaErrorCode = -9983;
-    pub const PaErrorCode_paStreamIsNotStopped: root::PaErrorCode = -9982;
-    pub const PaErrorCode_paInputOverflowed: root::PaErrorCode = -9981;
-    pub const PaErrorCode_paOutputUnderflowed: root::PaErrorCode = -9980;
-    pub const PaErrorCode_paHostApiNotFound: root::PaErrorCode = -9979;
-    pub const PaErrorCode_paInvalidHostApi: root::PaErrorCode = -9978;
-    pub const PaErrorCode_paCanNotReadFromACallbackStream: root::PaErrorCode = -9977;
-    pub const PaErrorCode_paCanNotWriteToACallbackStream: root::PaErrorCode = -9976;
-    pub const PaErrorCode_paCanNotReadFromAnOutputOnlyStream: root::PaErrorCode = -9975;
-    pub const PaErrorCode_paCanNotWriteToAnInputOnlyStream: root::PaErrorCode = -9974;
-    pub const PaErrorCode_paIncompatibleStreamHostApi: root::PaErrorCode = -9973;
-    pub const PaErrorCode_paBadBufferPtr: root::PaErrorCode = -9972;
-    pub type PaErrorCode = i32;
-    extern "C" {
-        #[doc = " Translate the supplied PortAudio error code into a human readable"]
-        #[doc = "message."]
-        pub fn Pa_GetErrorText(errorCode: root::PaError) -> *const ::std::os::raw::c_char;
+        #[doc = "@param elementSizeBytes The size of a single data element in bytes."]
+        #[doc = ""]
+        #[doc = "@param elementCount The number of elements in the buffer (must be a power of 2)."]
+        #[doc = ""]
+        #[doc = "@param dataPtr A pointer to a previously allocated area where the data"]
+        #[doc = "will be maintained.  It must be elementCount*elementSizeBytes long."]
+        #[doc = ""]
+        #[doc = "@return -1 if elementCount is not a power of 2, otherwise 0."]
+        pub fn PaUtil_InitializeRingBuffer(
+            rbuf: *mut root::PaUtilRingBuffer,
+            elementSizeBytes: root::ring_buffer_size_t,
+            elementCount: root::ring_buffer_size_t,
+            dataPtr: *mut ::std::os::raw::c_void,
+        ) -> root::ring_buffer_size_t;
     }
     extern "C" {
-        #[doc = " Library initialization function - call this before using PortAudio."]
-        #[doc = "This function initializes internal data structures and prepares underlying"]
-        #[doc = "host APIs for use.  With the exception of Pa_GetVersion(), Pa_GetVersionText(),"]
-        #[doc = "and Pa_GetErrorText(), this function MUST be called before using any other"]
-        #[doc = "PortAudio API functions."]
+        #[doc = " Reset buffer to empty. Should only be called when buffer is NOT being read or written."]
         #[doc = ""]
-        #[doc = "If Pa_Initialize() is called multiple times, each successful"]
-        #[doc = "call must be matched with a corresponding call to Pa_Terminate()."]
-        #[doc = "Pairs of calls to Pa_Initialize()/Pa_Terminate() may overlap, and are not"]
-        #[doc = "required to be fully nested."]
-        #[doc = ""]
-        #[doc = "Note that if Pa_Initialize() returns an error code, Pa_Terminate() should"]
-        #[doc = "NOT be called."]
-        #[doc = ""]
-        #[doc = "@return paNoError if successful, otherwise an error code indicating the cause"]
-        #[doc = "of failure."]
-        #[doc = ""]
-        #[doc = "@see Pa_Terminate"]
-        pub fn Pa_Initialize() -> root::PaError;
+        #[doc = "@param rbuf The ring buffer."]
+        pub fn PaUtil_FlushRingBuffer(rbuf: *mut root::PaUtilRingBuffer);
     }
     extern "C" {
-        #[doc = " Library termination function - call this when finished using PortAudio."]
-        #[doc = "This function deallocates all resources allocated by PortAudio since it was"]
-        #[doc = "initialized by a call to Pa_Initialize(). In cases where Pa_Initialise() has"]
-        #[doc = "been called multiple times, each call must be matched with a corresponding call"]
-        #[doc = "to Pa_Terminate(). The final matching call to Pa_Terminate() will automatically"]
-        #[doc = "close any PortAudio streams that are still open."]
+        #[doc = " Retrieve the number of elements available in the ring buffer for writing."]
         #[doc = ""]
-        #[doc = "Pa_Terminate() MUST be called before exiting a program which uses PortAudio."]
-        #[doc = "Failure to do so may result in serious resource leaks, such as audio devices"]
-        #[doc = "not being available until the next reboot."]
+        #[doc = "@param rbuf The ring buffer."]
         #[doc = ""]
-        #[doc = "@return paNoError if successful, otherwise an error code indicating the cause"]
-        #[doc = "of failure."]
-        #[doc = ""]
-        #[doc = "@see Pa_Initialize"]
-        pub fn Pa_Terminate() -> root::PaError;
-    }
-    #[doc = " The type used to refer to audio devices. Values of this type usually"]
-    #[doc = "range from 0 to (Pa_GetDeviceCount()-1), and may also take on the PaNoDevice"]
-    #[doc = "and paUseHostApiSpecificDeviceSpecification values."]
-    #[doc = ""]
-    #[doc = "@see Pa_GetDeviceCount, paNoDevice, paUseHostApiSpecificDeviceSpecification"]
-    pub type PaDeviceIndex = ::std::os::raw::c_int;
-    #[doc = " The type used to enumerate to host APIs at runtime. Values of this type"]
-    #[doc = "range from 0 to (Pa_GetHostApiCount()-1)."]
-    #[doc = ""]
-    #[doc = "@see Pa_GetHostApiCount"]
-    pub type PaHostApiIndex = ::std::os::raw::c_int;
-    extern "C" {
-        #[doc = " Retrieve the number of available host APIs. Even if a host API is"]
-        #[doc = "available it may have no devices available."]
-        #[doc = ""]
-        #[doc = "@return A non-negative value indicating the number of available host APIs"]
-        #[doc = "or, a PaErrorCode (which are always negative) if PortAudio is not initialized"]
-        #[doc = "or an error is encountered."]
-        #[doc = ""]
-        #[doc = "@see PaHostApiIndex"]
-        pub fn Pa_GetHostApiCount() -> root::PaHostApiIndex;
+        #[doc = "@return The number of elements available for writing."]
+        pub fn PaUtil_GetRingBufferWriteAvailable(
+            rbuf: *const root::PaUtilRingBuffer,
+        ) -> root::ring_buffer_size_t;
     }
     extern "C" {
-        #[doc = " Retrieve the index of the default host API. The default host API will be"]
-        #[doc = "the lowest common denominator host API on the current platform and is"]
-        #[doc = "unlikely to provide the best performance."]
+        #[doc = " Retrieve the number of elements available in the ring buffer for reading."]
         #[doc = ""]
-        #[doc = "@return A non-negative value ranging from 0 to (Pa_GetHostApiCount()-1)"]
-        #[doc = "indicating the default host API index or, a PaErrorCode (which are always"]
-        #[doc = "negative) if PortAudio is not initialized or an error is encountered."]
-        pub fn Pa_GetDefaultHostApi() -> root::PaHostApiIndex;
-    }
-    pub const PaHostApiTypeId_paInDevelopment: root::PaHostApiTypeId = 0;
-    pub const PaHostApiTypeId_paDirectSound: root::PaHostApiTypeId = 1;
-    pub const PaHostApiTypeId_paMME: root::PaHostApiTypeId = 2;
-    pub const PaHostApiTypeId_paASIO: root::PaHostApiTypeId = 3;
-    pub const PaHostApiTypeId_paSoundManager: root::PaHostApiTypeId = 4;
-    pub const PaHostApiTypeId_paCoreAudio: root::PaHostApiTypeId = 5;
-    pub const PaHostApiTypeId_paOSS: root::PaHostApiTypeId = 7;
-    pub const PaHostApiTypeId_paALSA: root::PaHostApiTypeId = 8;
-    pub const PaHostApiTypeId_paAL: root::PaHostApiTypeId = 9;
-    pub const PaHostApiTypeId_paBeOS: root::PaHostApiTypeId = 10;
-    pub const PaHostApiTypeId_paWDMKS: root::PaHostApiTypeId = 11;
-    pub const PaHostApiTypeId_paJACK: root::PaHostApiTypeId = 12;
-    pub const PaHostApiTypeId_paWASAPI: root::PaHostApiTypeId = 13;
-    pub const PaHostApiTypeId_paAudioScienceHPI: root::PaHostApiTypeId = 14;
-    #[doc = " Unchanging unique identifiers for each supported host API. This type"]
-    #[doc = "is used in the PaHostApiInfo structure. The values are guaranteed to be"]
-    #[doc = "unique and to never change, thus allowing code to be written that"]
-    #[doc = "conditionally uses host API specific extensions."]
-    #[doc = ""]
-    #[doc = "New type ids will be allocated when support for a host API reaches"]
-    #[doc = "\"public alpha\" status, prior to that developers should use the"]
-    #[doc = "paInDevelopment type id."]
-    #[doc = ""]
-    #[doc = "@see PaHostApiInfo"]
-    pub type PaHostApiTypeId = u32;
-    #[doc = " A structure containing information about a particular host API."]
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
-    pub struct PaHostApiInfo {
-        #[doc = " this is struct version 1"]
-        pub structVersion: ::std::os::raw::c_int,
-        #[doc = " The well known unique identifier of this host API @see PaHostApiTypeId"]
-        pub type_: root::PaHostApiTypeId,
-        #[doc = " A textual description of the host API for display on user interfaces."]
-        pub name: *const ::std::os::raw::c_char,
-        #[doc = "  The number of devices belonging to this host API. This field may be"]
-        #[doc = "used in conjunction with Pa_HostApiDeviceIndexToDeviceIndex() to enumerate"]
-        #[doc = "all devices for this host API."]
-        #[doc = "@see Pa_HostApiDeviceIndexToDeviceIndex"]
-        pub deviceCount: ::std::os::raw::c_int,
-        #[doc = " The default input device for this host API. The value will be a"]
-        #[doc = "device index ranging from 0 to (Pa_GetDeviceCount()-1), or paNoDevice"]
-        #[doc = "if no default input device is available."]
-        pub defaultInputDevice: root::PaDeviceIndex,
-        #[doc = " The default output device for this host API. The value will be a"]
-        #[doc = "device index ranging from 0 to (Pa_GetDeviceCount()-1), or paNoDevice"]
-        #[doc = "if no default output device is available."]
-        pub defaultOutputDevice: root::PaDeviceIndex,
+        #[doc = "@param rbuf The ring buffer."]
+        #[doc = ""]
+        #[doc = "@return The number of elements available for reading."]
+        pub fn PaUtil_GetRingBufferReadAvailable(
+            rbuf: *const root::PaUtilRingBuffer,
+        ) -> root::ring_buffer_size_t;
     }
     extern "C" {
-        #[doc = " Retrieve a pointer to a structure containing information about a specific"]
-        #[doc = "host Api."]
+        #[doc = " Write data to the ring buffer."]
         #[doc = ""]
-        #[doc = "@param hostApi A valid host API index ranging from 0 to (Pa_GetHostApiCount()-1)"]
+        #[doc = "@param rbuf The ring buffer."]
         #[doc = ""]
-        #[doc = "@return A pointer to an immutable PaHostApiInfo structure describing"]
-        #[doc = "a specific host API. If the hostApi parameter is out of range or an error"]
-        #[doc = "is encountered, the function returns NULL."]
+        #[doc = "@param data The address of new data to write to the buffer."]
         #[doc = ""]
-        #[doc = "The returned structure is owned by the PortAudio implementation and must not"]
-        #[doc = "be manipulated or freed. The pointer is only guaranteed to be valid between"]
-        #[doc = "calls to Pa_Initialize() and Pa_Terminate()."]
-        pub fn Pa_GetHostApiInfo(hostApi: root::PaHostApiIndex) -> *const root::PaHostApiInfo;
+        #[doc = "@param elementCount The number of elements to be written."]
+        #[doc = ""]
+        #[doc = "@return The number of elements written."]
+        pub fn PaUtil_WriteRingBuffer(
+            rbuf: *mut root::PaUtilRingBuffer,
+            data: *const ::std::os::raw::c_void,
+            elementCount: root::ring_buffer_size_t,
+        ) -> root::ring_buffer_size_t;
     }
     extern "C" {
-        #[doc = " Convert a static host API unique identifier, into a runtime"]
-        #[doc = "host API index."]
+        #[doc = " Read data from the ring buffer."]
         #[doc = ""]
-        #[doc = "@param type A unique host API identifier belonging to the PaHostApiTypeId"]
-        #[doc = "enumeration."]
+        #[doc = "@param rbuf The ring buffer."]
         #[doc = ""]
-        #[doc = "@return A valid PaHostApiIndex ranging from 0 to (Pa_GetHostApiCount()-1) or,"]
-        #[doc = "a PaErrorCode (which are always negative) if PortAudio is not initialized"]
-        #[doc = "or an error is encountered."]
+        #[doc = "@param data The address where the data should be stored."]
         #[doc = ""]
-        #[doc = "The paHostApiNotFound error code indicates that the host API specified by the"]
-        #[doc = "type parameter is not available."]
+        #[doc = "@param elementCount The number of elements to be read."]
         #[doc = ""]
-        #[doc = "@see PaHostApiTypeId"]
-        pub fn Pa_HostApiTypeIdToHostApiIndex(type_: root::PaHostApiTypeId)
-            -> root::PaHostApiIndex;
+        #[doc = "@return The number of elements read."]
+        pub fn PaUtil_ReadRingBuffer(
+            rbuf: *mut root::PaUtilRingBuffer,
+            data: *mut ::std::os::raw::c_void,
+            elementCount: root::ring_buffer_size_t,
+        ) -> root::ring_buffer_size_t;
     }
     extern "C" {
-        #[doc = " Convert a host-API-specific device index to standard PortAudio device index."]
-        #[doc = "This function may be used in conjunction with the deviceCount field of"]
-        #[doc = "PaHostApiInfo to enumerate all devices for the specified host API."]
+        #[doc = " Get address of region(s) to which we can write data."]
         #[doc = ""]
-        #[doc = "@param hostApi A valid host API index ranging from 0 to (Pa_GetHostApiCount()-1)"]
+        #[doc = "@param rbuf The ring buffer."]
         #[doc = ""]
-        #[doc = "@param hostApiDeviceIndex A valid per-host device index in the range"]
-        #[doc = "0 to (Pa_GetHostApiInfo(hostApi)->deviceCount-1)"]
+        #[doc = "@param elementCount The number of elements desired."]
         #[doc = ""]
-        #[doc = "@return A non-negative PaDeviceIndex ranging from 0 to (Pa_GetDeviceCount()-1)"]
-        #[doc = "or, a PaErrorCode (which are always negative) if PortAudio is not initialized"]
-        #[doc = "or an error is encountered."]
+        #[doc = "@param dataPtr1 The address where the first (or only) region pointer will be"]
+        #[doc = "stored."]
         #[doc = ""]
-        #[doc = "A paInvalidHostApi error code indicates that the host API index specified by"]
-        #[doc = "the hostApi parameter is out of range."]
+        #[doc = "@param sizePtr1 The address where the first (or only) region length will be"]
+        #[doc = "stored."]
         #[doc = ""]
-        #[doc = "A paInvalidDevice error code indicates that the hostApiDeviceIndex parameter"]
-        #[doc = "is out of range."]
+        #[doc = "@param dataPtr2 The address where the second region pointer will be stored if"]
+        #[doc = "the first region is too small to satisfy elementCount."]
         #[doc = ""]
-        #[doc = "@see PaHostApiInfo"]
-        pub fn Pa_HostApiDeviceIndexToDeviceIndex(
-            hostApi: root::PaHostApiIndex,
-            hostApiDeviceIndex: ::std::os::raw::c_int,
-        ) -> root::PaDeviceIndex;
-    }
-    #[doc = " Structure used to return information about a host error condition."]
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
-    pub struct PaHostErrorInfo {
-        #[doc = "< the host API which returned the error code"]
-        pub hostApiType: root::PaHostApiTypeId,
-        #[doc = "< the error code returned"]
-        pub errorCode: ::std::os::raw::c_long,
-        #[doc = "< a textual description of the error if available, otherwise a zero-length string"]
-        pub errorText: *const ::std::os::raw::c_char,
+        #[doc = "@param sizePtr2 The address where the second region length will be stored if"]
+        #[doc = "the first region is too small to satisfy elementCount."]
+        #[doc = ""]
+        #[doc = "@return The room available to be written or elementCount, whichever is smaller."]
+        pub fn PaUtil_GetRingBufferWriteRegions(
+            rbuf: *mut root::PaUtilRingBuffer,
+            elementCount: root::ring_buffer_size_t,
+            dataPtr1: *mut *mut ::std::os::raw::c_void,
+            sizePtr1: *mut root::ring_buffer_size_t,
+            dataPtr2: *mut *mut ::std::os::raw::c_void,
+            sizePtr2: *mut root::ring_buffer_size_t,
+        ) -> root::ring_buffer_size_t;
     }
     extern "C" {
-        #[doc = " Return information about the last host error encountered. The error"]
-        #[doc = "information returned by Pa_GetLastHostErrorInfo() will never be modified"]
-        #[doc = "asynchronously by errors occurring in other PortAudio owned threads"]
-        #[doc = "(such as the thread that manages the stream callback.)"]
+        #[doc = " Advance the write index to the next location to be written."]
         #[doc = ""]
-        #[doc = "This function is provided as a last resort, primarily to enhance debugging"]
-        #[doc = "by providing clients with access to all available error information."]
+        #[doc = "@param rbuf The ring buffer."]
         #[doc = ""]
-        #[doc = "@return A pointer to an immutable structure constraining information about"]
-        #[doc = "the host error. The values in this structure will only be valid if a"]
-        #[doc = "PortAudio function has previously returned the paUnanticipatedHostError"]
-        #[doc = "error code."]
-        pub fn Pa_GetLastHostErrorInfo() -> *const root::PaHostErrorInfo;
+        #[doc = "@param elementCount The number of elements to advance."]
+        #[doc = ""]
+        #[doc = "@return The new position."]
+        pub fn PaUtil_AdvanceRingBufferWriteIndex(
+            rbuf: *mut root::PaUtilRingBuffer,
+            elementCount: root::ring_buffer_size_t,
+        ) -> root::ring_buffer_size_t;
     }
     extern "C" {
-        #[doc = " Retrieve the number of available devices. The number of available devices"]
-        #[doc = "may be zero."]
+        #[doc = " Get address of region(s) from which we can read data."]
         #[doc = ""]
-        #[doc = "@return A non-negative value indicating the number of available devices or,"]
-        #[doc = "a PaErrorCode (which are always negative) if PortAudio is not initialized"]
-        #[doc = "or an error is encountered."]
-        pub fn Pa_GetDeviceCount() -> root::PaDeviceIndex;
+        #[doc = "@param rbuf The ring buffer."]
+        #[doc = ""]
+        #[doc = "@param elementCount The number of elements desired."]
+        #[doc = ""]
+        #[doc = "@param dataPtr1 The address where the first (or only) region pointer will be"]
+        #[doc = "stored."]
+        #[doc = ""]
+        #[doc = "@param sizePtr1 The address where the first (or only) region length will be"]
+        #[doc = "stored."]
+        #[doc = ""]
+        #[doc = "@param dataPtr2 The address where the second region pointer will be stored if"]
+        #[doc = "the first region is too small to satisfy elementCount."]
+        #[doc = ""]
+        #[doc = "@param sizePtr2 The address where the second region length will be stored if"]
+        #[doc = "the first region is too small to satisfy elementCount."]
+        #[doc = ""]
+        #[doc = "@return The number of elements available for reading."]
+        pub fn PaUtil_GetRingBufferReadRegions(
+            rbuf: *mut root::PaUtilRingBuffer,
+            elementCount: root::ring_buffer_size_t,
+            dataPtr1: *mut *mut ::std::os::raw::c_void,
+            sizePtr1: *mut root::ring_buffer_size_t,
+            dataPtr2: *mut *mut ::std::os::raw::c_void,
+            sizePtr2: *mut root::ring_buffer_size_t,
+        ) -> root::ring_buffer_size_t;
     }
     extern "C" {
-        #[doc = " Retrieve the index of the default input device. The result can be"]
-        #[doc = "used in the inputDevice parameter to Pa_OpenStream()."]
+        #[doc = " Advance the read index to the next location to be read."]
         #[doc = ""]
-        #[doc = "@return The default input device index for the default host API, or paNoDevice"]
-        #[doc = "if no default input device is available or an error was encountered."]
-        pub fn Pa_GetDefaultInputDevice() -> root::PaDeviceIndex;
-    }
-    extern "C" {
-        #[doc = " Retrieve the index of the default output device. The result can be"]
-        #[doc = "used in the outputDevice parameter to Pa_OpenStream()."]
+        #[doc = "@param rbuf The ring buffer."]
         #[doc = ""]
-        #[doc = "@return The default output device index for the default host API, or paNoDevice"]
-        #[doc = "if no default output device is available or an error was encountered."]
+        #[doc = "@param elementCount The number of elements to advance."]
         #[doc = ""]
-        #[doc = "@note"]
-        #[doc = "On the PC, the user can specify a default device by"]
-        #[doc = "setting an environment variable. For example, to use device #1."]
-        #[doc = "<pre>"]
-        #[doc = "set PA_RECOMMENDED_OUTPUT_DEVICE=1"]
-        #[doc = "</pre>"]
-        #[doc = "The user should first determine the available device ids by using"]
-        #[doc = "the supplied application \"pa_devs\"."]
-        pub fn Pa_GetDefaultOutputDevice() -> root::PaDeviceIndex;
-    }
-    #[doc = " The type used to represent monotonic time in seconds. PaTime is"]
-    #[doc = "used for the fields of the PaStreamCallbackTimeInfo argument to the"]
-    #[doc = "PaStreamCallback and as the result of Pa_GetStreamTime()."]
-    #[doc = ""]
-    #[doc = "PaTime values have unspecified origin."]
-    #[doc = ""]
-    #[doc = "@see PaStreamCallback, PaStreamCallbackTimeInfo, Pa_GetStreamTime"]
-    pub type PaTime = f64;
-    #[doc = " A type used to specify one or more sample formats. Each value indicates"]
-    #[doc = "a possible format for sound data passed to and from the stream callback,"]
-    #[doc = "Pa_ReadStream and Pa_WriteStream."]
-    #[doc = ""]
-    #[doc = "The standard formats paFloat32, paInt16, paInt32, paInt24, paInt8"]
-    #[doc = "and aUInt8 are usually implemented by all implementations."]
-    #[doc = ""]
-    #[doc = "The floating point representation (paFloat32) uses +1.0 and -1.0 as the"]
-    #[doc = "maximum and minimum respectively."]
-    #[doc = ""]
-    #[doc = "paUInt8 is an unsigned 8 bit format where 128 is considered \"ground\""]
-    #[doc = ""]
-    #[doc = "The paNonInterleaved flag indicates that audio data is passed as an array"]
-    #[doc = "of pointers to separate buffers, one buffer for each channel. Usually,"]
-    #[doc = "when this flag is not used, audio data is passed as a single buffer with"]
-    #[doc = "all channels interleaved."]
-    #[doc = ""]
-    #[doc = "@see Pa_OpenStream, Pa_OpenDefaultStream, PaDeviceInfo"]
-    #[doc = "@see paFloat32, paInt16, paInt32, paInt24, paInt8"]
-    #[doc = "@see paUInt8, paCustomFormat, paNonInterleaved"]
-    pub type PaSampleFormat = ::std::os::raw::c_ulong;
-    #[doc = " A structure providing information and capabilities of PortAudio devices."]
-    #[doc = "Devices may support input, output or both input and output."]
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
-    pub struct PaDeviceInfo {
-        pub structVersion: ::std::os::raw::c_int,
-        pub name: *const ::std::os::raw::c_char,
-        #[doc = "< note this is a host API index, not a type id"]
-        pub hostApi: root::PaHostApiIndex,
-        pub maxInputChannels: ::std::os::raw::c_int,
-        pub maxOutputChannels: ::std::os::raw::c_int,
-        #[doc = " Default latency values for interactive performance."]
-        pub defaultLowInputLatency: root::PaTime,
-        pub defaultLowOutputLatency: root::PaTime,
-        #[doc = " Default latency values for robust non-interactive applications (eg. playing sound files)."]
-        pub defaultHighInputLatency: root::PaTime,
-        pub defaultHighOutputLatency: root::PaTime,
-        pub defaultSampleRate: f64,
-    }
-    extern "C" {
-        #[doc = " Retrieve a pointer to a PaDeviceInfo structure containing information"]
-        #[doc = "about the specified device."]
-        #[doc = "@return A pointer to an immutable PaDeviceInfo structure. If the device"]
-        #[doc = "parameter is out of range the function returns NULL."]
-        #[doc = ""]
-        #[doc = "@param device A valid device index in the range 0 to (Pa_GetDeviceCount()-1)"]
-        #[doc = ""]
-        #[doc = "@note PortAudio manages the memory referenced by the returned pointer,"]
-        #[doc = "the client must not manipulate or free the memory. The pointer is only"]
-        #[doc = "guaranteed to be valid between calls to Pa_Initialize() and Pa_Terminate()."]
-        #[doc = ""]
-        #[doc = "@see PaDeviceInfo, PaDeviceIndex"]
-        pub fn Pa_GetDeviceInfo(device: root::PaDeviceIndex) -> *const root::PaDeviceInfo;
-    }
-    #[doc = " Parameters for one direction (input or output) of a stream."]
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
-    pub struct PaStreamParameters {
-        #[doc = " A valid device index in the range 0 to (Pa_GetDeviceCount()-1)"]
-        #[doc = "specifying the device to be used or the special constant"]
-        #[doc = "paUseHostApiSpecificDeviceSpecification which indicates that the actual"]
-        #[doc = "device(s) to use are specified in hostApiSpecificStreamInfo."]
-        #[doc = "This field must not be set to paNoDevice."]
-        pub device: root::PaDeviceIndex,
-        #[doc = " The number of channels of sound to be delivered to the"]
-        #[doc = "stream callback or accessed by Pa_ReadStream() or Pa_WriteStream()."]
-        #[doc = "It can range from 1 to the value of maxInputChannels in the"]
-        #[doc = "PaDeviceInfo record for the device specified by the device parameter."]
-        pub channelCount: ::std::os::raw::c_int,
-        #[doc = " The sample format of the buffer provided to the stream callback,"]
-        #[doc = "a_ReadStream() or Pa_WriteStream(). It may be any of the formats described"]
-        #[doc = "by the PaSampleFormat enumeration."]
-        pub sampleFormat: root::PaSampleFormat,
-        #[doc = " The desired latency in seconds. Where practical, implementations should"]
-        #[doc = "configure their latency based on these parameters, otherwise they may"]
-        #[doc = "choose the closest viable latency instead. Unless the suggested latency"]
-        #[doc = "is greater than the absolute upper limit for the device implementations"]
-        #[doc = "should round the suggestedLatency up to the next practical value - ie to"]
-        #[doc = "provide an equal or higher latency than suggestedLatency wherever possible."]
-        #[doc = "Actual latency values for an open stream may be retrieved using the"]
-        #[doc = "inputLatency and outputLatency fields of the PaStreamInfo structure"]
-        #[doc = "returned by Pa_GetStreamInfo()."]
-        #[doc = "@see default*Latency in PaDeviceInfo, *Latency in PaStreamInfo"]
-        pub suggestedLatency: root::PaTime,
-        #[doc = " An optional pointer to a host api specific data structure"]
-        #[doc = "containing additional information for device setup and/or stream processing."]
-        #[doc = "hostApiSpecificStreamInfo is never required for correct operation,"]
-        #[doc = "if not used it should be set to NULL."]
-        pub hostApiSpecificStreamInfo: *mut ::std::os::raw::c_void,
-    }
-    extern "C" {
-        #[doc = " Determine whether it would be possible to open a stream with the specified"]
-        #[doc = "parameters."]
-        #[doc = ""]
-        #[doc = "@param inputParameters A structure that describes the input parameters used to"]
-        #[doc = "open a stream. The suggestedLatency field is ignored. See PaStreamParameters"]
-        #[doc = "for a description of these parameters. inputParameters must be NULL for"]
-        #[doc = "output-only streams."]
-        #[doc = ""]
-        #[doc = "@param outputParameters A structure that describes the output parameters used"]
-        #[doc = "to open a stream. The suggestedLatency field is ignored. See PaStreamParameters"]
-        #[doc = "for a description of these parameters. outputParameters must be NULL for"]
-        #[doc = "input-only streams."]
-        #[doc = ""]
-        #[doc = "@param sampleRate The required sampleRate. For full-duplex streams it is the"]
-        #[doc = "sample rate for both input and output"]
-        #[doc = ""]
-        #[doc = "@return Returns 0 if the format is supported, and an error code indicating why"]
-        #[doc = "the format is not supported otherwise. The constant paFormatIsSupported is"]
-        #[doc = "provided to compare with the return value for success."]
-        #[doc = ""]
-        #[doc = "@see paFormatIsSupported, PaStreamParameters"]
-        pub fn Pa_IsFormatSupported(
-            inputParameters: *const root::PaStreamParameters,
-            outputParameters: *const root::PaStreamParameters,
-            sampleRate: f64,
-        ) -> root::PaError;
-    }
-    #[doc = "A single PaStream can provide multiple channels of real-time"]
-    #[doc = "streaming audio input and output to a client application. A stream"]
-    #[doc = "provides access to audio hardware represented by one or more"]
-    #[doc = "PaDevices. Depending on the underlying Host API, it may be possible"]
-    #[doc = "to open multiple streams using the same device, however this behavior"]
-    #[doc = "is implementation defined. Portable applications should assume that"]
-    #[doc = "a PaDevice may be simultaneously used by at most one PaStream."]
-    #[doc = ""]
-    #[doc = "Pointers to PaStream objects are passed between PortAudio functions that"]
-    #[doc = "operate on streams."]
-    #[doc = ""]
-    #[doc = "@see Pa_OpenStream, Pa_OpenDefaultStream, Pa_OpenDefaultStream, Pa_CloseStream,"]
-    #[doc = "Pa_StartStream, Pa_StopStream, Pa_AbortStream, Pa_IsStreamActive,"]
-    #[doc = "Pa_GetStreamTime, Pa_GetStreamCpuLoad"]
-    pub type PaStream = ::std::os::raw::c_void;
-    #[doc = " Flags used to control the behavior of a stream. They are passed as"]
-    #[doc = "parameters to Pa_OpenStream or Pa_OpenDefaultStream. Multiple flags may be"]
-    #[doc = "ORed together."]
-    #[doc = ""]
-    #[doc = "@see Pa_OpenStream, Pa_OpenDefaultStream"]
-    #[doc = "@see paNoFlag, paClipOff, paDitherOff, paNeverDropInput,"]
-    #[doc = "paPrimeOutputBuffersUsingStreamCallback, paPlatformSpecificFlags"]
-    pub type PaStreamFlags = ::std::os::raw::c_ulong;
-    #[doc = "Timing information for the buffers passed to the stream callback."]
-    #[doc = ""]
-    #[doc = "Time values are expressed in seconds and are synchronised with the time base used by Pa_GetStreamTime() for the associated stream."]
-    #[doc = ""]
-    #[doc = "@see PaStreamCallback, Pa_GetStreamTime"]
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
-    pub struct PaStreamCallbackTimeInfo {
-        #[doc = "< The time when the first sample of the input buffer was captured at the ADC input"]
-        pub inputBufferAdcTime: root::PaTime,
-        #[doc = "< The time when the stream callback was invoked"]
-        pub currentTime: root::PaTime,
-        #[doc = "< The time when the first sample of the output buffer will output the DAC"]
-        pub outputBufferDacTime: root::PaTime,
-    }
-    #[doc = "Flag bit constants for the statusFlags to PaStreamCallback."]
-    #[doc = ""]
-    #[doc = "@see paInputUnderflow, paInputOverflow, paOutputUnderflow, paOutputOverflow,"]
-    #[doc = "paPrimingOutput"]
-    pub type PaStreamCallbackFlags = ::std::os::raw::c_ulong;
-    #[doc = "< Signal that the stream should continue invoking the callback and processing audio."]
-    pub const PaStreamCallbackResult_paContinue: root::PaStreamCallbackResult = 0;
-    #[doc = "< Signal that the stream should stop invoking the callback and finish once all output samples have played."]
-    pub const PaStreamCallbackResult_paComplete: root::PaStreamCallbackResult = 1;
-    #[doc = "< Signal that the stream should stop invoking the callback and finish as soon as possible."]
-    pub const PaStreamCallbackResult_paAbort: root::PaStreamCallbackResult = 2;
-    #[doc = "Allowable return values for the PaStreamCallback."]
-    #[doc = "@see PaStreamCallback"]
-    pub type PaStreamCallbackResult = u32;
-    #[doc = "Functions of type PaStreamCallback are implemented by PortAudio clients."]
-    #[doc = "They consume, process or generate audio in response to requests from an"]
-    #[doc = "active PortAudio stream."]
-    #[doc = ""]
-    #[doc = "When a stream is running, PortAudio calls the stream callback periodically."]
-    #[doc = "The callback function is responsible for processing buffers of audio samples"]
-    #[doc = "passed via the input and output parameters."]
-    #[doc = ""]
-    #[doc = "The PortAudio stream callback runs at very high or real-time priority."]
-    #[doc = "It is required to consistently meet its time deadlines. Do not allocate"]
-    #[doc = "memory, access the file system, call library functions or call other functions"]
-    #[doc = "from the stream callback that may block or take an unpredictable amount of"]
-    #[doc = "time to complete."]
-    #[doc = ""]
-    #[doc = "In order for a stream to maintain glitch-free operation the callback"]
-    #[doc = "must consume and return audio data faster than it is recorded and/or"]
-    #[doc = "played. PortAudio anticipates that each callback invocation may execute for"]
-    #[doc = "a duration approaching the duration of frameCount audio frames at the stream"]
-    #[doc = "sample rate. It is reasonable to expect to be able to utilise 70% or more of"]
-    #[doc = "the available CPU time in the PortAudio callback. However, due to buffer size"]
-    #[doc = "adaption and other factors, not all host APIs are able to guarantee audio"]
-    #[doc = "stability under heavy CPU load with arbitrary fixed callback buffer sizes."]
-    #[doc = "When high callback CPU utilisation is required the most robust behavior"]
-    #[doc = "can be achieved by using paFramesPerBufferUnspecified as the"]
-    #[doc = "Pa_OpenStream() framesPerBuffer parameter."]
-    #[doc = ""]
-    #[doc = "@param input and @param output are either arrays of interleaved samples or;"]
-    #[doc = "if non-interleaved samples were requested using the paNonInterleaved sample"]
-    #[doc = "format flag, an array of buffer pointers, one non-interleaved buffer for"]
-    #[doc = "each channel."]
-    #[doc = ""]
-    #[doc = "The format, packing and number of channels used by the buffers are"]
-    #[doc = "determined by parameters to Pa_OpenStream()."]
-    #[doc = ""]
-    #[doc = "@param frameCount The number of sample frames to be processed by"]
-    #[doc = "the stream callback."]
-    #[doc = ""]
-    #[doc = "@param timeInfo Timestamps indicating the ADC capture time of the first sample"]
-    #[doc = "in the input buffer, the DAC output time of the first sample in the output buffer"]
-    #[doc = "and the time the callback was invoked."]
-    #[doc = "See PaStreamCallbackTimeInfo and Pa_GetStreamTime()"]
-    #[doc = ""]
-    #[doc = "@param statusFlags Flags indicating whether input and/or output buffers"]
-    #[doc = "have been inserted or will be dropped to overcome underflow or overflow"]
-    #[doc = "conditions."]
-    #[doc = ""]
-    #[doc = "@param userData The value of a user supplied pointer passed to"]
-    #[doc = "Pa_OpenStream() intended for storing synthesis data etc."]
-    #[doc = ""]
-    #[doc = "@return"]
-    #[doc = "The stream callback should return one of the values in the"]
-    #[doc = "::PaStreamCallbackResult enumeration. To ensure that the callback continues"]
-    #[doc = "to be called, it should return paContinue (0). Either paComplete or paAbort"]
-    #[doc = "can be returned to finish stream processing, after either of these values is"]
-    #[doc = "returned the callback will not be called again. If paAbort is returned the"]
-    #[doc = "stream will finish as soon as possible. If paComplete is returned, the stream"]
-    #[doc = "will continue until all buffers generated by the callback have been played."]
-    #[doc = "This may be useful in applications such as soundfile players where a specific"]
-    #[doc = "duration of output is required. However, it is not necessary to utilize this"]
-    #[doc = "mechanism as Pa_StopStream(), Pa_AbortStream() or Pa_CloseStream() can also"]
-    #[doc = "be used to stop the stream. The callback must always fill the entire output"]
-    #[doc = "buffer irrespective of its return value."]
-    #[doc = ""]
-    #[doc = "@see Pa_OpenStream, Pa_OpenDefaultStream"]
-    #[doc = ""]
-    #[doc = "@note With the exception of Pa_GetStreamCpuLoad() it is not permissible to call"]
-    #[doc = "PortAudio API functions from within the stream callback."]
-    pub type PaStreamCallback = ::std::option::Option<
-        unsafe extern "C" fn(
-            input: *const ::std::os::raw::c_void,
-            output: *mut ::std::os::raw::c_void,
-            frameCount: ::std::os::raw::c_ulong,
-            timeInfo: *const root::PaStreamCallbackTimeInfo,
-            statusFlags: root::PaStreamCallbackFlags,
-            userData: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int,
-    >;
-    extern "C" {
-        #[doc = " Opens a stream for either input, output or both."]
-        #[doc = ""]
-        #[doc = "@param stream The address of a PaStream pointer which will receive"]
-        #[doc = "a pointer to the newly opened stream."]
-        #[doc = ""]
-        #[doc = "@param inputParameters A structure that describes the input parameters used by"]
-        #[doc = "the opened stream. See PaStreamParameters for a description of these parameters."]
-        #[doc = "inputParameters must be NULL for output-only streams."]
-        #[doc = ""]
-        #[doc = "@param outputParameters A structure that describes the output parameters used by"]
-        #[doc = "the opened stream. See PaStreamParameters for a description of these parameters."]
-        #[doc = "outputParameters must be NULL for input-only streams."]
-        #[doc = ""]
-        #[doc = "@param sampleRate The desired sampleRate. For full-duplex streams it is the"]
-        #[doc = "sample rate for both input and output"]
-        #[doc = ""]
-        #[doc = "@param framesPerBuffer The number of frames passed to the stream callback"]
-        #[doc = "function, or the preferred block granularity for a blocking read/write stream."]
-        #[doc = "The special value paFramesPerBufferUnspecified (0) may be used to request that"]
-        #[doc = "the stream callback will receive an optimal (and possibly varying) number of"]
-        #[doc = "frames based on host requirements and the requested latency settings."]
-        #[doc = "Note: With some host APIs, the use of non-zero framesPerBuffer for a callback"]
-        #[doc = "stream may introduce an additional layer of buffering which could introduce"]
-        #[doc = "additional latency. PortAudio guarantees that the additional latency"]
-        #[doc = "will be kept to the theoretical minimum however, it is strongly recommended"]
-        #[doc = "that a non-zero framesPerBuffer value only be used when your algorithm"]
-        #[doc = "requires a fixed number of frames per stream callback."]
-        #[doc = ""]
-        #[doc = "@param streamFlags Flags which modify the behavior of the streaming process."]
-        #[doc = "This parameter may contain a combination of flags ORed together. Some flags may"]
-        #[doc = "only be relevant to certain buffer formats."]
-        #[doc = ""]
-        #[doc = "@param streamCallback A pointer to a client supplied function that is responsible"]
-        #[doc = "for processing and filling input and output buffers. If this parameter is NULL"]
-        #[doc = "the stream will be opened in 'blocking read/write' mode. In blocking mode,"]
-        #[doc = "the client can receive sample data using Pa_ReadStream and write sample data"]
-        #[doc = "using Pa_WriteStream, the number of samples that may be read or written"]
-        #[doc = "without blocking is returned by Pa_GetStreamReadAvailable and"]
-        #[doc = "Pa_GetStreamWriteAvailable respectively."]
-        #[doc = ""]
-        #[doc = "@param userData A client supplied pointer which is passed to the stream callback"]
-        #[doc = "function. It could for example, contain a pointer to instance data necessary"]
-        #[doc = "for processing the audio buffers. This parameter is ignored if streamCallback"]
-        #[doc = "is NULL."]
-        #[doc = ""]
-        #[doc = "@return"]
-        #[doc = "Upon success Pa_OpenStream() returns paNoError and places a pointer to a"]
-        #[doc = "valid PaStream in the stream argument. The stream is inactive (stopped)."]
-        #[doc = "If a call to Pa_OpenStream() fails, a non-zero error code is returned (see"]
-        #[doc = "PaError for possible error codes) and the value of stream is invalid."]
-        #[doc = ""]
-        #[doc = "@see PaStreamParameters, PaStreamCallback, Pa_ReadStream, Pa_WriteStream,"]
-        #[doc = "Pa_GetStreamReadAvailable, Pa_GetStreamWriteAvailable"]
-        pub fn Pa_OpenStream(
-            stream: *mut *mut root::PaStream,
-            inputParameters: *const root::PaStreamParameters,
-            outputParameters: *const root::PaStreamParameters,
-            sampleRate: f64,
-            framesPerBuffer: ::std::os::raw::c_ulong,
-            streamFlags: root::PaStreamFlags,
-            streamCallback: root::PaStreamCallback,
-            userData: *mut ::std::os::raw::c_void,
-        ) -> root::PaError;
-    }
-    extern "C" {
-        #[doc = " A simplified version of Pa_OpenStream() that opens the default input"]
-        #[doc = "and/or output devices."]
-        #[doc = ""]
-        #[doc = "@param stream The address of a PaStream pointer which will receive"]
-        #[doc = "a pointer to the newly opened stream."]
-        #[doc = ""]
-        #[doc = "@param numInputChannels  The number of channels of sound that will be supplied"]
-        #[doc = "to the stream callback or returned by Pa_ReadStream. It can range from 1 to"]
-        #[doc = "the value of maxInputChannels in the PaDeviceInfo record for the default input"]
-        #[doc = "device. If 0 the stream is opened as an output-only stream."]
-        #[doc = ""]
-        #[doc = "@param numOutputChannels The number of channels of sound to be delivered to the"]
-        #[doc = "stream callback or passed to Pa_WriteStream. It can range from 1 to the value"]
-        #[doc = "of maxOutputChannels in the PaDeviceInfo record for the default output device."]
-        #[doc = "If 0 the stream is opened as an output-only stream."]
-        #[doc = ""]
-        #[doc = "@param sampleFormat The sample format of both the input and output buffers"]
-        #[doc = "provided to the callback or passed to and from Pa_ReadStream and Pa_WriteStream."]
-        #[doc = "sampleFormat may be any of the formats described by the PaSampleFormat"]
-        #[doc = "enumeration."]
-        #[doc = ""]
-        #[doc = "@param sampleRate Same as Pa_OpenStream parameter of the same name."]
-        #[doc = "@param framesPerBuffer Same as Pa_OpenStream parameter of the same name."]
-        #[doc = "@param streamCallback Same as Pa_OpenStream parameter of the same name."]
-        #[doc = "@param userData Same as Pa_OpenStream parameter of the same name."]
-        #[doc = ""]
-        #[doc = "@return As for Pa_OpenStream"]
-        #[doc = ""]
-        #[doc = "@see Pa_OpenStream, PaStreamCallback"]
-        pub fn Pa_OpenDefaultStream(
-            stream: *mut *mut root::PaStream,
-            numInputChannels: ::std::os::raw::c_int,
-            numOutputChannels: ::std::os::raw::c_int,
-            sampleFormat: root::PaSampleFormat,
-            sampleRate: f64,
-            framesPerBuffer: ::std::os::raw::c_ulong,
-            streamCallback: root::PaStreamCallback,
-            userData: *mut ::std::os::raw::c_void,
-        ) -> root::PaError;
-    }
-    extern "C" {
-        #[doc = " Closes an audio stream. If the audio stream is active it"]
-        #[doc = "discards any pending buffers as if Pa_AbortStream() had been called."]
-        pub fn Pa_CloseStream(stream: *mut root::PaStream) -> root::PaError;
-    }
-    #[doc = " Functions of type PaStreamFinishedCallback are implemented by PortAudio"]
-    #[doc = "clients. They can be registered with a stream using the Pa_SetStreamFinishedCallback"]
-    #[doc = "function. Once registered they are called when the stream becomes inactive"]
-    #[doc = "(ie once a call to Pa_StopStream() will not block)."]
-    #[doc = "A stream will become inactive after the stream callback returns non-zero,"]
-    #[doc = "or when Pa_StopStream or Pa_AbortStream is called. For a stream providing audio"]
-    #[doc = "output, if the stream callback returns paComplete, or Pa_StopStream() is called,"]
-    #[doc = "the stream finished callback will not be called until all generated sample data"]
-    #[doc = "has been played."]
-    #[doc = ""]
-    #[doc = "@param userData The userData parameter supplied to Pa_OpenStream()"]
-    #[doc = ""]
-    #[doc = "@see Pa_SetStreamFinishedCallback"]
-    pub type PaStreamFinishedCallback =
-        ::std::option::Option<unsafe extern "C" fn(userData: *mut ::std::os::raw::c_void)>;
-    extern "C" {
-        #[doc = " Register a stream finished callback function which will be called when the"]
-        #[doc = "stream becomes inactive. See the description of PaStreamFinishedCallback for"]
-        #[doc = "further details about when the callback will be called."]
-        #[doc = ""]
-        #[doc = "@param stream a pointer to a PaStream that is in the stopped state - if the"]
-        #[doc = "stream is not stopped, the stream's finished callback will remain unchanged"]
-        #[doc = "and an error code will be returned."]
-        #[doc = ""]
-        #[doc = "@param streamFinishedCallback a pointer to a function with the same signature"]
-        #[doc = "as PaStreamFinishedCallback, that will be called when the stream becomes"]
-        #[doc = "inactive. Passing NULL for this parameter will un-register a previously"]
-        #[doc = "registered stream finished callback function."]
-        #[doc = ""]
-        #[doc = "@return on success returns paNoError, otherwise an error code indicating the cause"]
-        #[doc = "of the error."]
-        #[doc = ""]
-        #[doc = "@see PaStreamFinishedCallback"]
-        pub fn Pa_SetStreamFinishedCallback(
-            stream: *mut root::PaStream,
-            streamFinishedCallback: root::PaStreamFinishedCallback,
-        ) -> root::PaError;
-    }
-    extern "C" {
-        #[doc = " Commences audio processing."]
-        pub fn Pa_StartStream(stream: *mut root::PaStream) -> root::PaError;
-    }
-    extern "C" {
-        #[doc = " Terminates audio processing. It waits until all pending"]
-        #[doc = "audio buffers have been played before it returns."]
-        pub fn Pa_StopStream(stream: *mut root::PaStream) -> root::PaError;
-    }
-    extern "C" {
-        #[doc = " Terminates audio processing immediately without waiting for pending"]
-        #[doc = "buffers to complete."]
-        pub fn Pa_AbortStream(stream: *mut root::PaStream) -> root::PaError;
-    }
-    extern "C" {
-        #[doc = " Determine whether the stream is stopped."]
-        #[doc = "A stream is considered to be stopped prior to a successful call to"]
-        #[doc = "Pa_StartStream and after a successful call to Pa_StopStream or Pa_AbortStream."]
-        #[doc = "If a stream callback returns a value other than paContinue the stream is NOT"]
-        #[doc = "considered to be stopped."]
-        #[doc = ""]
-        #[doc = "@return Returns one (1) when the stream is stopped, zero (0) when"]
-        #[doc = "the stream is running or, a PaErrorCode (which are always negative) if"]
-        #[doc = "PortAudio is not initialized or an error is encountered."]
-        #[doc = ""]
-        #[doc = "@see Pa_StopStream, Pa_AbortStream, Pa_IsStreamActive"]
-        pub fn Pa_IsStreamStopped(stream: *mut root::PaStream) -> root::PaError;
-    }
-    extern "C" {
-        #[doc = " Determine whether the stream is active."]
-        #[doc = "A stream is active after a successful call to Pa_StartStream(), until it"]
-        #[doc = "becomes inactive either as a result of a call to Pa_StopStream() or"]
-        #[doc = "Pa_AbortStream(), or as a result of a return value other than paContinue from"]
-        #[doc = "the stream callback. In the latter case, the stream is considered inactive"]
-        #[doc = "after the last buffer has finished playing."]
-        #[doc = ""]
-        #[doc = "@return Returns one (1) when the stream is active (ie playing or recording"]
-        #[doc = "audio), zero (0) when not playing or, a PaErrorCode (which are always negative)"]
-        #[doc = "if PortAudio is not initialized or an error is encountered."]
-        #[doc = ""]
-        #[doc = "@see Pa_StopStream, Pa_AbortStream, Pa_IsStreamStopped"]
-        pub fn Pa_IsStreamActive(stream: *mut root::PaStream) -> root::PaError;
-    }
-    #[doc = " A structure containing unchanging information about an open stream."]
-    #[doc = "@see Pa_GetStreamInfo"]
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
-    pub struct PaStreamInfo {
-        #[doc = " this is struct version 1"]
-        pub structVersion: ::std::os::raw::c_int,
-        #[doc = " The input latency of the stream in seconds. This value provides the most"]
-        #[doc = "accurate estimate of input latency available to the implementation. It may"]
-        #[doc = "differ significantly from the suggestedLatency value passed to Pa_OpenStream()."]
-        #[doc = "The value of this field will be zero (0.) for output-only streams."]
-        #[doc = "@see PaTime"]
-        pub inputLatency: root::PaTime,
-        #[doc = " The output latency of the stream in seconds. This value provides the most"]
-        #[doc = "accurate estimate of output latency available to the implementation. It may"]
-        #[doc = "differ significantly from the suggestedLatency value passed to Pa_OpenStream()."]
-        #[doc = "The value of this field will be zero (0.) for input-only streams."]
-        #[doc = "@see PaTime"]
-        pub outputLatency: root::PaTime,
-        #[doc = " The sample rate of the stream in Hertz (samples per second). In cases"]
-        #[doc = "where the hardware sample rate is inaccurate and PortAudio is aware of it,"]
-        #[doc = "the value of this field may be different from the sampleRate parameter"]
-        #[doc = "passed to Pa_OpenStream(). If information about the actual hardware sample"]
-        #[doc = "rate is not available, this field will have the same value as the sampleRate"]
-        #[doc = "parameter passed to Pa_OpenStream()."]
-        pub sampleRate: f64,
-    }
-    extern "C" {
-        #[doc = " Retrieve a pointer to a PaStreamInfo structure containing information"]
-        #[doc = "about the specified stream."]
-        #[doc = "@return A pointer to an immutable PaStreamInfo structure. If the stream"]
-        #[doc = "parameter is invalid, or an error is encountered, the function returns NULL."]
-        #[doc = ""]
-        #[doc = "@param stream A pointer to an open stream previously created with Pa_OpenStream."]
-        #[doc = ""]
-        #[doc = "@note PortAudio manages the memory referenced by the returned pointer,"]
-        #[doc = "the client must not manipulate or free the memory. The pointer is only"]
-        #[doc = "guaranteed to be valid until the specified stream is closed."]
-        #[doc = ""]
-        #[doc = "@see PaStreamInfo"]
-        pub fn Pa_GetStreamInfo(stream: *mut root::PaStream) -> *const root::PaStreamInfo;
-    }
-    extern "C" {
-        #[doc = " Returns the current time in seconds for a stream according to the same clock used"]
-        #[doc = "to generate callback PaStreamCallbackTimeInfo timestamps. The time values are"]
-        #[doc = "monotonically increasing and have unspecified origin."]
-        #[doc = ""]
-        #[doc = "Pa_GetStreamTime returns valid time values for the entire life of the stream,"]
-        #[doc = "from when the stream is opened until it is closed. Starting and stopping the stream"]
-        #[doc = "does not affect the passage of time returned by Pa_GetStreamTime."]
-        #[doc = ""]
-        #[doc = "This time may be used for synchronizing other events to the audio stream, for"]
-        #[doc = "example synchronizing audio to MIDI."]
-        #[doc = ""]
-        #[doc = "@return The stream's current time in seconds, or 0 if an error occurred."]
-        #[doc = ""]
-        #[doc = "@see PaTime, PaStreamCallback, PaStreamCallbackTimeInfo"]
-        pub fn Pa_GetStreamTime(stream: *mut root::PaStream) -> root::PaTime;
-    }
-    extern "C" {
-        #[doc = " Retrieve CPU usage information for the specified stream."]
-        #[doc = "The \"CPU Load\" is a fraction of total CPU time consumed by a callback stream's"]
-        #[doc = "audio processing routines including, but not limited to the client supplied"]
-        #[doc = "stream callback. This function does not work with blocking read/write streams."]
-        #[doc = ""]
-        #[doc = "This function may be called from the stream callback function or the"]
-        #[doc = "application."]
-        #[doc = ""]
-        #[doc = "@return"]
-        #[doc = "A floating point value, typically between 0.0 and 1.0, where 1.0 indicates"]
-        #[doc = "that the stream callback is consuming the maximum number of CPU cycles possible"]
-        #[doc = "to maintain real-time operation. A value of 0.5 would imply that PortAudio and"]
-        #[doc = "the stream callback was consuming roughly 50% of the available CPU time. The"]
-        #[doc = "return value may exceed 1.0. A value of 0.0 will always be returned for a"]
-        #[doc = "blocking read/write stream, or if an error occurs."]
-        pub fn Pa_GetStreamCpuLoad(stream: *mut root::PaStream) -> f64;
-    }
-    extern "C" {
-        #[doc = " Read samples from an input stream. The function doesn't return until"]
-        #[doc = "the entire buffer has been filled - this may involve waiting for the operating"]
-        #[doc = "system to supply the data."]
-        #[doc = ""]
-        #[doc = "@param stream A pointer to an open stream previously created with Pa_OpenStream."]
-        #[doc = ""]
-        #[doc = "@param buffer A pointer to a buffer of sample frames. The buffer contains"]
-        #[doc = "samples in the format specified by the inputParameters->sampleFormat field"]
-        #[doc = "used to open the stream, and the number of channels specified by"]
-        #[doc = "inputParameters->numChannels. If non-interleaved samples were requested using"]
-        #[doc = "the paNonInterleaved sample format flag, buffer is a pointer to the first element"]
-        #[doc = "of an array of buffer pointers, one non-interleaved buffer for each channel."]
-        #[doc = ""]
-        #[doc = "@param frames The number of frames to be read into buffer. This parameter"]
-        #[doc = "is not constrained to a specific range, however high performance applications"]
-        #[doc = "will want to match this parameter to the framesPerBuffer parameter used"]
-        #[doc = "when opening the stream."]
-        #[doc = ""]
-        #[doc = "@return On success PaNoError will be returned, or PaInputOverflowed if input"]
-        #[doc = "data was discarded by PortAudio after the previous call and before this call."]
-        pub fn Pa_ReadStream(
-            stream: *mut root::PaStream,
-            buffer: *mut ::std::os::raw::c_void,
-            frames: ::std::os::raw::c_ulong,
-        ) -> root::PaError;
-    }
-    extern "C" {
-        #[doc = " Write samples to an output stream. This function doesn't return until the"]
-        #[doc = "entire buffer has been written - this may involve waiting for the operating"]
-        #[doc = "system to consume the data."]
-        #[doc = ""]
-        #[doc = "@param stream A pointer to an open stream previously created with Pa_OpenStream."]
-        #[doc = ""]
-        #[doc = "@param buffer A pointer to a buffer of sample frames. The buffer contains"]
-        #[doc = "samples in the format specified by the outputParameters->sampleFormat field"]
-        #[doc = "used to open the stream, and the number of channels specified by"]
-        #[doc = "outputParameters->numChannels. If non-interleaved samples were requested using"]
-        #[doc = "the paNonInterleaved sample format flag, buffer is a pointer to the first element"]
-        #[doc = "of an array of buffer pointers, one non-interleaved buffer for each channel."]
-        #[doc = ""]
-        #[doc = "@param frames The number of frames to be written from buffer. This parameter"]
-        #[doc = "is not constrained to a specific range, however high performance applications"]
-        #[doc = "will want to match this parameter to the framesPerBuffer parameter used"]
-        #[doc = "when opening the stream."]
-        #[doc = ""]
-        #[doc = "@return On success PaNoError will be returned, or paOutputUnderflowed if"]
-        #[doc = "additional output data was inserted after the previous call and before this"]
-        #[doc = "call."]
-        pub fn Pa_WriteStream(
-            stream: *mut root::PaStream,
-            buffer: *const ::std::os::raw::c_void,
-            frames: ::std::os::raw::c_ulong,
-        ) -> root::PaError;
-    }
-    extern "C" {
-        #[doc = " Retrieve the number of frames that can be read from the stream without"]
-        #[doc = "waiting."]
-        #[doc = ""]
-        #[doc = "@return Returns a non-negative value representing the maximum number of frames"]
-        #[doc = "that can be read from the stream without blocking or busy waiting or, a"]
-        #[doc = "PaErrorCode (which are always negative) if PortAudio is not initialized or an"]
-        #[doc = "error is encountered."]
-        pub fn Pa_GetStreamReadAvailable(stream: *mut root::PaStream) -> ::std::os::raw::c_long;
-    }
-    extern "C" {
-        #[doc = " Retrieve the number of frames that can be written to the stream without"]
-        #[doc = "waiting."]
-        #[doc = ""]
-        #[doc = "@return Returns a non-negative value representing the maximum number of frames"]
-        #[doc = "that can be written to the stream without blocking or busy waiting or, a"]
-        #[doc = "PaErrorCode (which are always negative) if PortAudio is not initialized or an"]
-        #[doc = "error is encountered."]
-        pub fn Pa_GetStreamWriteAvailable(stream: *mut root::PaStream) -> ::std::os::raw::c_long;
-    }
-    extern "C" {
-        #[doc = " Retrieve the size of a given sample format in bytes."]
-        #[doc = ""]
-        #[doc = "@return The size in bytes of a single sample in the specified format,"]
-        #[doc = "or paSampleFormatNotSupported if the format is not supported."]
-        pub fn Pa_GetSampleSize(format: root::PaSampleFormat) -> root::PaError;
-    }
-    extern "C" {
-        #[doc = " Put the caller to sleep for at least 'msec' milliseconds. This function is"]
-        #[doc = "provided only as a convenience for authors of portable code (such as the tests"]
-        #[doc = "and examples in the PortAudio distribution.)"]
-        #[doc = ""]
-        #[doc = "The function may sleep longer than requested so don't rely on this for accurate"]
-        #[doc = "musical timing."]
-        pub fn Pa_Sleep(msec: ::std::os::raw::c_long);
-    }
-    #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
-    pub struct PaUtilHostApiRepresentation {
-        _unused: [u8; 0],
-    }
-    extern "C" {
-        #[doc = " Retrieve a specific host API representation. This function can be used"]
-        #[doc = "by implementations to retrieve a pointer to their representation in"]
-        #[doc = "host api specific extension functions which aren't passed a rep pointer"]
-        #[doc = "by pa_front.c."]
-        #[doc = ""]
-        #[doc = "@param hostApi A pointer to a host API represenation pointer. Apon success"]
-        #[doc = "this will receive the requested representation pointer."]
-        #[doc = ""]
-        #[doc = "@param type A valid host API type identifier."]
-        #[doc = ""]
-        #[doc = "@returns An error code. If the result is PaNoError then a pointer to the"]
-        #[doc = "requested host API representation will be stored in *hostApi. If the host API"]
-        #[doc = "specified by type is not found, this function returns paHostApiNotFound."]
-        pub fn PaUtil_GetHostApiRepresentation(
-            hostApi: *mut *mut root::PaUtilHostApiRepresentation,
-            type_: root::PaHostApiTypeId,
-        ) -> root::PaError;
-    }
-    extern "C" {
-        #[doc = " Convert a PortAudio device index into a host API specific device index."]
-        #[doc = "@param hostApiDevice Pointer to a device index, on success this will recieve the"]
-        #[doc = "converted device index value."]
-        #[doc = "@param device The PortAudio device index to convert."]
-        #[doc = "@param hostApi The host api which the index should be converted for."]
-        #[doc = ""]
-        #[doc = "@returns On success returns PaNoError and places the converted index in the"]
-        #[doc = "hostApiDevice parameter."]
-        pub fn PaUtil_DeviceIndexToHostApiDeviceIndex(
-            hostApiDevice: *mut root::PaDeviceIndex,
-            device: root::PaDeviceIndex,
-            hostApi: *mut root::PaUtilHostApiRepresentation,
-        ) -> root::PaError;
-    }
-    extern "C" {
-        #[doc = " Set the host error information returned by Pa_GetLastHostErrorInfo. This"]
-        #[doc = "function and the paUnanticipatedHostError error code should be used as a"]
-        #[doc = "last resort.  Implementors should use existing PA error codes where possible,"]
-        #[doc = "or nominate new ones. Note that at it is always better to use"]
-        #[doc = "PaUtil_SetLastHostErrorInfo() and paUnanticipatedHostError than to return an"]
-        #[doc = "ambiguous or inaccurate PaError code."]
-        #[doc = ""]
-        #[doc = "@param hostApiType  The host API which encountered the error (ie of the caller)"]
-        #[doc = ""]
-        #[doc = "@param errorCode The error code returned by the native API function."]
-        #[doc = ""]
-        #[doc = "@param errorText A string describing the error. PaUtil_SetLastHostErrorInfo"]
-        #[doc = "makes a copy of the string, so it is not necessary for the pointer to remain"]
-        #[doc = "valid after the call to PaUtil_SetLastHostErrorInfo() returns."]
-        pub fn PaUtil_SetLastHostErrorInfo(
-            hostApiType: root::PaHostApiTypeId,
-            errorCode: ::std::os::raw::c_long,
-            errorText: *const ::std::os::raw::c_char,
-        );
-    }
-    extern "C" {
-        #[doc = " Allocate size bytes, guaranteed to be aligned to a FIXME byte boundary"]
-        pub fn PaUtil_AllocateMemory(size: ::std::os::raw::c_long) -> *mut ::std::os::raw::c_void;
-    }
-    extern "C" {
-        #[doc = " Realease block if non-NULL. block may be NULL"]
-        pub fn PaUtil_FreeMemory(block: *mut ::std::os::raw::c_void);
-    }
-    extern "C" {
-        #[doc = " Return the number of currently allocated blocks. This function can be"]
-        #[doc = "used for detecting memory leaks."]
-        #[doc = ""]
-        #[doc = "@note Allocations will only be tracked if PA_TRACK_MEMORY is #defined. If"]
-        #[doc = "it isn't, this function will always return 0."]
-        pub fn PaUtil_CountCurrentlyAllocatedBlocks() -> ::std::os::raw::c_int;
-    }
-    extern "C" {
-        #[doc = " Initialize the clock used by PaUtil_GetTime(). Call this before calling"]
-        #[doc = "PaUtil_GetTime."]
-        #[doc = ""]
-        #[doc = "@see PaUtil_GetTime"]
-        pub fn PaUtil_InitializeClock();
-    }
-    extern "C" {
-        #[doc = " Return the system time in seconds. Used to implement CPU load functions"]
-        #[doc = ""]
-        #[doc = "@see PaUtil_InitializeClock"]
-        pub fn PaUtil_GetTime() -> f64;
+        #[doc = "@return The new position."]
+        pub fn PaUtil_AdvanceRingBufferReadIndex(
+            rbuf: *mut root::PaUtilRingBuffer,
+            elementCount: root::ring_buffer_size_t,
+        ) -> root::ring_buffer_size_t;
     }
 }

@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use libc::{c_ulong, c_void};
 
-use crate::{kit, raw_portaudio};
+use crate::{kit, raw_pa_ringbuffer, raw_pa_util, raw_portaudio};
 use crate::rpa_error::PaError;
 
 /// Index number of a Host API
@@ -391,4 +391,17 @@ pub struct Stream<'a, I: SampleType, O: SampleType> {
   pub(crate) user_data: Box<StreamUserData<'a, I, O>>,
 }
 
+
+pub struct MemoryBlock {
+  pub(crate) inner: *mut ::std::os::raw::c_void
+}
+
+
+pub type RingBufferSizeT = i32;
+
+
+#[derive(Debug, Copy, Clone)]
+pub struct PaUtilRingBuffer {
+  pub(crate) inner: *mut raw_pa_ringbuffer::PaUtilRingBuffer
+}
 

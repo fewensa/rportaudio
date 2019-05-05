@@ -106,3 +106,23 @@ impl fmt::Debug for PaError {
 /// The original NoError is mapped to Ok(()) and other values mapped to Err(x)
 pub type PaResult = Result<(), PaError>;
 
+
+#[derive(PartialEq, Copy, Clone)]
+#[allow(missing_docs)]
+pub enum RingBufferError {
+  NotPower2
+}
+
+impl fmt::Display for RingBufferError {
+  fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    match *self {
+      RingBufferError::NotPower2 => write!(f, "Ring buffer size is not power of 2.")
+    }
+  }
+}
+
+impl fmt::Debug for RingBufferError {
+  fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    ::std::fmt::Display::fmt(self, fmt)
+  }
+}
