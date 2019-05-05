@@ -1,7 +1,6 @@
-use std::fmt;
+use std::{error, fmt};
 
 use crate::raw_portaudio;
-
 
 #[repr(i32)]
 #[derive(PartialEq, Copy, Clone)]
@@ -110,13 +109,13 @@ pub type PaResult = Result<(), PaError>;
 #[derive(PartialEq, Copy, Clone)]
 #[allow(missing_docs)]
 pub enum RingBufferError {
-  NotPower2
+  NotPower2(&'static str)
 }
 
 impl fmt::Display for RingBufferError {
   fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
     match *self {
-      RingBufferError::NotPower2 => write!(f, "Ring buffer size is not power of 2.")
+      RingBufferError::NotPower2(ref msg) => write!(f, msg)
     }
   }
 }
@@ -126,3 +125,18 @@ impl fmt::Debug for RingBufferError {
     ::std::fmt::Display::fmt(self, fmt)
   }
 }
+
+impl error::Error for RingBufferError {
+  fn description(&self) -> &str {
+    match *self {
+      RingBufferError::NotPower2(msg) => msg,
+    }
+  }
+
+  fn cause(&self) -> Option<&error::Error> {
+    match *self {
+      _ => Some(self),
+    }
+  }
+}
+
