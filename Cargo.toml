@@ -5,6 +5,11 @@ authors = ["anuz"]
 edition = "2018"
 
 [dependencies]
+bitflags = "0.3"
+libc = "0.2"
+#portaudio-sys = "0.1.1"
 
-cc = "1.0"
 
+[build-dependencies]
+#cc = "1.0"
+bindgen = "0.49.0"

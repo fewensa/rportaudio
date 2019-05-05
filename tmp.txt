@@ -1,0 +1,20 @@
+
+
+
+
+raw_portaudio::PaHostApiTypeId_paInDevelopment => HostApiType::InDevelopment,
+raw_portaudio::PaHostApiTypeId_paDirectSound => HostApiType::DirectSound,
+raw_portaudio::PaHostApiTypeId_paMME => HostApiType::MME,
+raw_portaudio::PaHostApiTypeId_paASIO => HostApiType::ASIO,
+raw_portaudio::PaHostApiTypeId_paSoundManager => HostApiType::SoundManager,
+raw_portaudio::PaHostApiTypeId_paCoreAudio => HostApiType::CoreAudio,
+raw_portaudio::PaHostApiTypeId_paOSS => HostApiType::OSS,
+raw_portaudio::PaHostApiTypeId_paALSA => HostApiType::ALSA,
+raw_portaudio::PaHostApiTypeId_paAL => HostApiType::AL,
+raw_portaudio::PaHostApiTypeId_paBeOS => HostApiType::BeOS,
+raw_portaudio::PaHostApiTypeId_paWDMKS => HostApiType::WDMKS,
+raw_portaudio::PaHostApiTypeId_paJACK => HostApiType::JACK,
+raw_portaudio::PaHostApiTypeId_paWASAPI => HostApiType::WASAPI,
+raw_portaudio::PaHostApiTypeId_paAudioScienceHPI => HostApiType::AudioScienceHPI,
+
+
