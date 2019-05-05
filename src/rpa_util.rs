@@ -1,12 +1,16 @@
 use crate::raw_pa_util;
 use crate::types::MemoryBlock;
+use crate::rpa_error::RingBufferError;
 
-pub fn allocate_memory(size: i32) -> MemoryBlock {
+pub fn allocate_memory(size: i32) -> Result<MemoryBlock, RingBufferError> {
   unsafe {
     let memory = raw_pa_util::PaUtil_AllocateMemory(size as ::std::os::raw::c_long);
-    MemoryBlock {
-      inner: memory
+    if memory.is_null() {
+      return Err(RingBufferError::MemoryAllocateFail("Fail to allocate memory for ring buffer."));
     }
+    Ok(MemoryBlock {
+      inner: memory
+    })
   }
 }
 

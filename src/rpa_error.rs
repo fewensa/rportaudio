@@ -109,12 +109,14 @@ pub type PaResult = Result<(), PaError>;
 #[derive(PartialEq, Copy, Clone)]
 #[allow(missing_docs)]
 pub enum RingBufferError {
+  MemoryAllocateFail(&'static str),
   NotPower2(&'static str)
 }
 
 impl fmt::Display for RingBufferError {
   fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
     match *self {
+      RingBufferError::MemoryAllocateFail(ref msg) => write!(f, "{:?}", msg),
       RingBufferError::NotPower2(ref msg) => write!(f, "{:?}", msg)
     }
   }
@@ -130,6 +132,8 @@ impl error::Error for RingBufferError {
   fn description(&self) -> &str {
     match *self {
       RingBufferError::NotPower2(msg) => msg,
+      RingBufferError::MemoryAllocateFail(msg) => msg,
+      _ => {}
     }
   }
 
