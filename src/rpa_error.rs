@@ -133,7 +133,7 @@ impl error::Error for RingBufferError {
     match *self {
       RingBufferError::NotPower2(msg) => msg,
       RingBufferError::MemoryAllocateFail(msg) => msg,
-      _ => {}
+      _ => "UNKNOW ERROR"
     }
   }
 
