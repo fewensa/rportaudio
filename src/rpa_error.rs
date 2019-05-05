@@ -115,7 +115,7 @@ pub enum RingBufferError {
 impl fmt::Display for RingBufferError {
   fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
     match *self {
-      RingBufferError::NotPower2(ref msg) => write!(f, msg)
+      RingBufferError::NotPower2(ref msg) => write!(f, "{:?}", msg)
     }
   }
 }
