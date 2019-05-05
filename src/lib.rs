@@ -3,8 +3,8 @@ extern crate bitflags;
 extern crate libc;
 
 
-pub(self) use crate::pa_include::portaudio::root as raw_portaudio;
-//pub(self) use portaudio_sys as raw_portaudio;
+//pub(self) use crate::pa_include::portaudio::root as raw_portaudio;
+pub(self) use portaudio_sys as raw_portaudio;
 
 pub(self) mod pa_include;
 

@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 bitflags = "0.3"
 libc = "0.2"
-#portaudio-sys = "0.1.1"
+portaudio-sys = "0.1.1"
 
 
 [build-dependencies]

@@ -35,12 +35,12 @@ pub fn terminate() -> PaResult {
   kit::to_pa_result(unsafe { raw_portaudio::Pa_Terminate() })
 }
 
-pub fn version_info() -> PaVersionInfo {
-  unsafe {
-    let pa_version_info = raw_portaudio::Pa_GetVersionInfo();
-    PaVersionInfo::from_raw(&*pa_version_info)
-  }
-}
+//pub fn version_info() -> PaVersionInfo {
+//  unsafe {
+//    let pa_version_info = raw_portaudio::Pa_GetVersionInfo();
+//    PaVersionInfo::from_raw(&*pa_version_info)
+//  }
+//}
 
 pub fn error_text(pa_error: PaError) -> String {
   match pa_error {
@@ -315,7 +315,7 @@ pub fn open_default_stream<'a, T>(
 
 
 /// Set a callback which is to be called when the StreamCallback finishes
-pub fn set_stream_finished_callback<'a, I, O>(stream: &mut Stream<I, O>, finished_callback: Box<StreamFinishedCallback<'a>>) -> PaResult
+pub fn set_stream_finished_callback<'a, I, O>(stream: &mut Stream<'a, I, O>, finished_callback: Box<StreamFinishedCallback<'a>>) -> PaResult
   where
     I: SampleType, O: SampleType {
   stream.user_data.finished_callback = Some(finished_callback);
@@ -491,11 +491,11 @@ pub fn sample_size<T: SampleType>() -> Result<u32, PaError> {
 }
 
 
-pub fn sleep(msec: i32) {
-  unsafe {
-    raw_portaudio::Pa_Sleep(msec as ::std::os::raw::c_long);
-  }
-}
+//pub fn sleep(msec: i32) {
+//  unsafe {
+//    raw_portaudio::Pa_Sleep(msec as ::std::os::raw::c_long);
+//  }
+//}
 
 
 type StreamCallbackType = extern "C" fn(*const c_void, *mut c_void, ::libc::c_ulong, *const raw_portaudio::PaStreamCallbackTimeInfo, raw_portaudio::PaStreamCallbackFlags, *mut c_void) -> ::libc::c_int;

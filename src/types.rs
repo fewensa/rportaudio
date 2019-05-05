@@ -14,32 +14,32 @@ pub type HostApiIndex = u32;
 pub type DeviceIndex = u32;
 
 
-#[derive(Debug, Clone)]
-pub struct PaVersionInfo {
-//  pub(crate) pa_version_info: *const raw_portaudio::PaVersionInfo
-
-  pub major: i32,
-  pub minor: i32,
-  pub sub_minor: i32,
-  #[doc = "This is currently the Git revision hash but may change in the future."]
-  #[doc = "The versionControlRevision is updated by running a script before compiling the library."]
-  #[doc = "If the update does not occur, this value may refer to an earlier revision."]
-  pub control_revision: String,
-  #[doc = " Version as a string, for example \"PortAudio V19.5.0-devel, revision 1952M\""]
-  pub text: String,
-}
-
-impl PaVersionInfo {
-  pub(crate) fn from_raw(raw: &raw_portaudio::PaVersionInfo) -> PaVersionInfo {
-    PaVersionInfo {
-      major: raw.versionMajor,
-      minor: raw.versionMinor,
-      sub_minor: raw.versionSubMinor,
-      control_revision: String::from_utf8_lossy(unsafe { CStr::from_ptr(raw.versionControlRevision).to_bytes() }).into_owned(),
-      text: String::from_utf8_lossy(unsafe { CStr::from_ptr(raw.versionText).to_bytes() }).into_owned(),
-    }
-  }
-}
+//#[derive(Debug, Clone)]
+//pub struct PaVersionInfo {
+////  pub(crate) pa_version_info: *const raw_portaudio::PaVersionInfo
+//
+//  pub major: i32,
+//  pub minor: i32,
+//  pub sub_minor: i32,
+//  #[doc = "This is currently the Git revision hash but may change in the future."]
+//  #[doc = "The versionControlRevision is updated by running a script before compiling the library."]
+//  #[doc = "If the update does not occur, this value may refer to an earlier revision."]
+//  pub control_revision: String,
+//  #[doc = " Version as a string, for example \"PortAudio V19.5.0-devel, revision 1952M\""]
+//  pub text: String,
+//}
+//
+//impl PaVersionInfo {
+//  pub(crate) fn from_raw(raw: &raw_portaudio::PaVersionInfo) -> PaVersionInfo {
+//    PaVersionInfo {
+//      major: raw.versionMajor,
+//      minor: raw.versionMinor,
+//      sub_minor: raw.versionSubMinor,
+//      control_revision: String::from_utf8_lossy(unsafe { CStr::from_ptr(raw.versionControlRevision).to_bytes() }).into_owned(),
+//      text: String::from_utf8_lossy(unsafe { CStr::from_ptr(raw.versionText).to_bytes() }).into_owned(),
+//    }
+//  }
+//}
 
 
 /// Possible Host API types
@@ -47,20 +47,20 @@ impl PaVersionInfo {
 #[derive(Debug, Copy, Clone)]
 #[allow(missing_docs)]
 pub enum HostApiType {
-  InDevelopment = raw_portaudio::PaHostApiTypeId_paInDevelopment,
-  DirectSound = raw_portaudio::PaHostApiTypeId_paDirectSound,
-  MME = raw_portaudio::PaHostApiTypeId_paMME,
-  ASIO = raw_portaudio::PaHostApiTypeId_paASIO,
-  SoundManager = raw_portaudio::PaHostApiTypeId_paSoundManager,
-  CoreAudio = raw_portaudio::PaHostApiTypeId_paCoreAudio,
-  OSS = raw_portaudio::PaHostApiTypeId_paOSS,
-  ALSA = raw_portaudio::PaHostApiTypeId_paALSA,
-  AL = raw_portaudio::PaHostApiTypeId_paAL,
-  BeOS = raw_portaudio::PaHostApiTypeId_paBeOS,
-  WDMKS = raw_portaudio::PaHostApiTypeId_paWDMKS,
-  JACK = raw_portaudio::PaHostApiTypeId_paJACK,
-  WASAPI = raw_portaudio::PaHostApiTypeId_paWASAPI,
-  AudioScienceHPI = raw_portaudio::PaHostApiTypeId_paAudioScienceHPI,
+  InDevelopment = raw_portaudio::paInDevelopment,
+  DirectSound = raw_portaudio::paDirectSound,
+  MME = raw_portaudio::paMME,
+  ASIO = raw_portaudio::paASIO,
+  SoundManager = raw_portaudio::paSoundManager,
+  CoreAudio = raw_portaudio::paCoreAudio,
+  OSS = raw_portaudio::paOSS,
+  ALSA = raw_portaudio::paALSA,
+  AL = raw_portaudio::paAL,
+  BeOS = raw_portaudio::paBeOS,
+  WDMKS = raw_portaudio::paWDMKS,
+  JACK = raw_portaudio::paJACK,
+  WASAPI = raw_portaudio::paWASAPI,
+  AudioScienceHPI = raw_portaudio::paAudioScienceHPI,
 
   /// Added for when FromPrimitive returns None
   Unknown,
@@ -76,20 +76,20 @@ impl HostApiType {
   /// Get the enum value corresponding to the u32
   pub fn from_u32(num: u32) -> HostApiType {
     match num {
-      raw_portaudio::PaHostApiTypeId_paInDevelopment => HostApiType::InDevelopment,
-      raw_portaudio::PaHostApiTypeId_paDirectSound => HostApiType::DirectSound,
-      raw_portaudio::PaHostApiTypeId_paMME => HostApiType::MME,
-      raw_portaudio::PaHostApiTypeId_paASIO => HostApiType::ASIO,
-      raw_portaudio::PaHostApiTypeId_paSoundManager => HostApiType::SoundManager,
-      raw_portaudio::PaHostApiTypeId_paCoreAudio => HostApiType::CoreAudio,
-      raw_portaudio::PaHostApiTypeId_paOSS => HostApiType::OSS,
-      raw_portaudio::PaHostApiTypeId_paALSA => HostApiType::ALSA,
-      raw_portaudio::PaHostApiTypeId_paAL => HostApiType::AL,
-      raw_portaudio::PaHostApiTypeId_paBeOS => HostApiType::BeOS,
-      raw_portaudio::PaHostApiTypeId_paWDMKS => HostApiType::WDMKS,
-      raw_portaudio::PaHostApiTypeId_paJACK => HostApiType::JACK,
-      raw_portaudio::PaHostApiTypeId_paWASAPI => HostApiType::WASAPI,
-      raw_portaudio::PaHostApiTypeId_paAudioScienceHPI => HostApiType::AudioScienceHPI,
+      raw_portaudio::paInDevelopment => HostApiType::InDevelopment,
+      raw_portaudio::paDirectSound => HostApiType::DirectSound,
+      raw_portaudio::paMME => HostApiType::MME,
+      raw_portaudio::paASIO => HostApiType::ASIO,
+      raw_portaudio::paSoundManager => HostApiType::SoundManager,
+      raw_portaudio::paCoreAudio => HostApiType::CoreAudio,
+      raw_portaudio::paOSS => HostApiType::OSS,
+      raw_portaudio::paALSA => HostApiType::ALSA,
+      raw_portaudio::paAL => HostApiType::AL,
+      raw_portaudio::paBeOS => HostApiType::BeOS,
+      raw_portaudio::paWDMKS => HostApiType::WDMKS,
+      raw_portaudio::paJACK => HostApiType::JACK,
+      raw_portaudio::paWASAPI => HostApiType::WASAPI,
+      raw_portaudio::paAudioScienceHPI => HostApiType::AudioScienceHPI,
       _ => HostApiType::Unknown,
     }
   }
@@ -123,7 +123,7 @@ impl PaHostApiInfo {
   pub(crate) fn from_raw(raw: &raw_portaudio::PaHostApiInfo) -> PaHostApiInfo {
     Self {
       struct_version: raw.structVersion,
-      type_: HostApiType::from_u32(raw.type_),
+      type_: HostApiType::from_u32(raw._type),
       name: String::from_utf8_lossy(unsafe { CStr::from_ptr(raw.name).to_bytes() }).into_owned(),
       device_count: raw.deviceCount as u32,
       default_input: match raw.defaultInputDevice {
@@ -360,13 +360,13 @@ bitflags!(
 #[derive(Copy, Clone)]
 pub enum PaStreamCallbackResult {
   /// Continue invoking the callback
-  Continue = raw_portaudio::PaStreamCallbackResult_paContinue,
+  Continue = raw_portaudio::paContinue,
 
   /// Stop invoking the callback and finish once everything has played
-  Complete = raw_portaudio::PaStreamCallbackResult_paComplete,
+  Complete = raw_portaudio::paComplete,
 
   /// Stop invoking the callback and finish as soon as possible
-  Abort = raw_portaudio::PaStreamCallbackResult_paAbort,
+  Abort = raw_portaudio::paAbort,
 }
 
 
@@ -384,7 +384,7 @@ pub(crate) struct StreamUserData<'a, I, O> {
 /// An object for an PortAudio stream
 ///
 /// Streams can have an input type I and output type O.
-pub(crate) struct Stream<'a, I: SampleType, O: SampleType> {
+pub struct Stream<'a, I: SampleType, O: SampleType> {
   pub(crate) pa_stream: *mut raw_portaudio::PaStream,
   pub(crate) inputs: u32,
   pub(crate) outputs: u32,
