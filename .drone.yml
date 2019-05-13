@@ -85,7 +85,7 @@ steps:
     commands:
       - apt update -y
       - apt install -y cmake g++
-      - cargo test -- --nocapture --exact
+#      - cargo test -- --nocapture --exact
       - cargo package
 
 trigger:
