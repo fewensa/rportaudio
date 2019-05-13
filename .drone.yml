@@ -56,8 +56,10 @@ steps:
       - name: cargo
         path: /root/.cargo
     commands:
+      - apt update -y
+      - apt install -y cmake g++
+      - export RUST_BACKTRACE=1
       - cargo test -- --nocapture --exact
-      - sh -f /root/.cargo/credentials
       - export PA_LINK=false
       - cargo publish
 
@@ -81,6 +83,9 @@ steps:
   - name: build
     image: rust:1.33-slim
     privileged: true
+    volumes:
+      - name: cargo
+        path: /root/.cargo
     commands:
       - apt update -y
       - apt install -y cmake g++
@@ -88,6 +93,11 @@ steps:
       - cargo test -- --nocapture --exact
       - export PA_LINK=false
       - cargo package
+
+volumes:
+  - name: cargo
+    host:
+      path: /data/mount/cargo
 
 trigger:
   branch:
