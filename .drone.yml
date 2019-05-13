@@ -82,7 +82,7 @@ steps:
     privileged: true
     commands:
       - apt update -y
-      - apt install -y cmake
+      - apt install -y cmake g++
       - cargo test -- --nocapture --exact
       - cargo package
 
