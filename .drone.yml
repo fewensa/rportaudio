@@ -81,6 +81,8 @@ steps:
     image: rust:1.33-slim
     privileged: true
     commands:
+      - apt update -y
+      - apt install -y cmake
       - cargo test -- --nocapture --exact
       - cargo package
 
