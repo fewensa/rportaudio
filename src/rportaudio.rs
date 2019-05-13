@@ -199,7 +199,7 @@ pub fn open_stream<'a, I, O>(
   output: Option<PaStreamParameters<O>>,
   sample_rate: f64,
   frames_per_buffer: u64,
-  flags: StreamFlags,
+  flags: PaStreamFlags,
   callback: Option<Box<StreamCallback<'a, I, O>>>,
 ) -> Result<Stream<'a, I, O>, PaError>
   where I: SampleType, O: SampleType {

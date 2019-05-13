@@ -5,6 +5,7 @@ use crate::rpa_error::{PaError, PaResult};
 
 pub fn to_pa_result(code: i32) -> PaResult {
   if code == raw_portaudio::paNoError {
+//  if code == PaError::PaNoError {
     return Ok(());
   }
   Err(PaError::from_i32(code))

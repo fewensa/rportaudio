@@ -1,80 +1,79 @@
-//extern crate bindgen;
+mod portaudio_build {
+  use std;
+  use std::path::Path;
+  use std::process::Command;
 
-use std::path::PathBuf;
+  pub fn download_sources() {
+    let mut command = Command::new("cmake");
+    command.arg("-P");
+    command.arg("download.cmake");
+
+    match command.status() {
+      Ok(status) =>
+        if !status.success() {
+          panic!("Failed to execute command: {:?}", command)
+        },
+      Err(error) =>
+        panic!("Failed to execute command: {:?}\n{}", command, error)
+    }
+  }
+
+  pub fn build_sources() {
+    let out_dir_env = std::env::var("OUT_DIR").unwrap();
+    let out_dir = Path::new(&out_dir_env);
+
+    let source_path = out_dir.join("portaudio");
+
+    cmake::Config::new(source_path)
+      .define("CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG", out_dir)
+      .define("CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE", out_dir)
+      .out_dir(out_dir)
+      .build_target("portaudio_static")
+      .build();
+
+    let build_dir = out_dir.join("build");
+    Command::new("make").arg("--directory").arg(build_dir.to_str().unwrap()).output().unwrap();
+
+    std::fs::read_dir(out_dir).unwrap().for_each(|f| {
+      println!("====> {:?}", std::fs::canonicalize(f.unwrap().path()));
+    });
+
+    println!("cargo:rustc-link-search=native={}", build_dir.to_str().unwrap());
+    println!("cargo:rustc-link-lib=dylib=portaudio");
+  }
+}
+
+
+#[cfg(not(windows))]
+fn compile() {
+  match pkg_config::find_library("portaudio-2.0") {
+    Ok(..) => {}
+    Err(e) => {
+      portaudio_build::download_sources();
+      portaudio_build::build_sources();
+    }
+  }
+}
+
+#[cfg(windows)]
+fn compile() {
+  portaudio_build::download_sources();
+  portaudio_build::build_sources();
+}
+
 
 fn main() {
+  let pa_compile = match std::env::var("PA_LINK") {
+    Ok(pac) => {
+      match &pac[..] {
+        "no" | "false" => false,
+        _ => true
+      }
+    }
+    Err(_) => true
+  };
 
-//  println!("cargo:rustc-link-lib=bz2");
-//
-//
-//
-//  let bindings = bindgen::Builder::default()
-//    .header("pa_include/pa_linux_alsa.h")
-//    .enable_cxx_namespaces()
-//    .layout_tests(false)
-//    .whitelist_type("PaAlsaStreamInfo")
-//    .whitelist_function("PaAlsa_InitializeStreamInfo")
-//    .whitelist_function("PaAlsa_EnableRealtimeScheduling")
-//    .whitelist_function("PaAlsa_EnableWatchdog")
-//    .whitelist_function("PaAlsa_GetStreamInputCard")
-//    .whitelist_function("PaAlsa_GetStreamOutputCard")
-//    .whitelist_function("PaAlsa_SetNumPeriods")
-//    .whitelist_function("PaAlsa_SetRetriesBusy")
-//    .whitelist_function("PaAlsa_SetLibraryPathName")
-//    .generate()
-//    .expect("Unable to generate bindings");
-//
-//  bindings
-//    .write_to_file(PathBuf::from("src/pa_include/pa_linux_alsa.rs").as_path())
-//    .expect("Couldn't write bindings!");
-//
-//
-//
-//  let bindings = bindgen::Builder::default()
-//    .header("pa_include/pa_ringbuffer.h")
-//    .enable_cxx_namespaces()
-//    .layout_tests(false)
-//    .generate()
-//    .expect("Unable to generate bindings");
-//
-//  bindings
-//    .write_to_file(PathBuf::from("src/pa_include/pa_ringbuffer.rs").as_path())
-//    .expect("Couldn't write bindings!");
-//
-//
-//
-//  let bindings = bindgen::Builder::default()
-//    .header("pa_include/pa_util.h")
-//    .enable_cxx_namespaces()
-//    .layout_tests(false)
-////    .whitelist_type("PaUtilHostApiRepresentation")
-//    .whitelist_function("PaUtil_SetLastHostErrorInfo")
-//    .whitelist_function("PaUtil_AllocateMemory")
-//    .whitelist_function("PaUtil_FreeMemory")
-//    .whitelist_function("PaUtil_CountCurrentlyAllocatedBlocks")
-//    .whitelist_function("PaUtil_InitializeClock")
-//    .whitelist_function("PaUtil_GetTime")
-//    .generate()
-//    .expect("Unable to generate bindings");
-//
-//  bindings
-//    .write_to_file(PathBuf::from("src/pa_include/pa_util.rs").as_path())
-//    .expect("Couldn't write bindings!");
-
-
-
-//  let bindings = bindgen::Builder::default()
-//    .header("pa_include/portaudio.h")
-//    .enable_cxx_namespaces()
-//    .layout_tests(false)
-//    .generate()
-//    .expect("Unable to generate bindings");
-//
-//  bindings
-//    .write_to_file(PathBuf::from("src/pa_include/portaudio.rs").as_path())
-//    .expect("Couldn't write bindings!");
-
-
-
-
+  if pa_compile {
+    compile();
+  }
 }

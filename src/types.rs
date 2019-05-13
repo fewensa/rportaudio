@@ -1,9 +1,7 @@
 use std::ffi::CStr;
 use std::time::Duration;
 
-use libc::{c_ulong, c_void};
-
-use crate::{kit, raw_pa_ringbuffer, raw_pa_util, raw_portaudio};
+use crate::{kit, raw_portaudio};
 use crate::rpa_error::PaError;
 
 /// Index number of a Host API
@@ -62,6 +60,22 @@ pub enum HostApiType {
   WASAPI = raw_portaudio::paWASAPI,
   AudioScienceHPI = raw_portaudio::paAudioScienceHPI,
 
+
+//  InDevelopment = raw_portaudio::PaHostApiTypeId_paInDevelopment,
+//  DirectSound = raw_portaudio::PaHostApiTypeId_paDirectSound,
+//  MME = raw_portaudio::PaHostApiTypeId_paMME,
+//  ASIO = raw_portaudio::PaHostApiTypeId_paASIO,
+//  SoundManager = raw_portaudio::PaHostApiTypeId_paSoundManager,
+//  CoreAudio = raw_portaudio::PaHostApiTypeId_paCoreAudio,
+//  OSS = raw_portaudio::PaHostApiTypeId_paOSS,
+//  ALSA = raw_portaudio::PaHostApiTypeId_paALSA,
+//  AL = raw_portaudio::PaHostApiTypeId_paAL,
+//  BeOS = raw_portaudio::PaHostApiTypeId_paBeOS,
+//  WDMKS = raw_portaudio::PaHostApiTypeId_paWDMKS,
+//  JACK = raw_portaudio::PaHostApiTypeId_paJACK,
+//  WASAPI = raw_portaudio::PaHostApiTypeId_paWASAPI,
+//  AudioScienceHPI = raw_portaudio::PaHostApiTypeId_paAudioScienceHPI,
+
   /// Added for when FromPrimitive returns None
   Unknown,
 }
@@ -90,6 +104,22 @@ impl HostApiType {
       raw_portaudio::paJACK => HostApiType::JACK,
       raw_portaudio::paWASAPI => HostApiType::WASAPI,
       raw_portaudio::paAudioScienceHPI => HostApiType::AudioScienceHPI,
+
+//      raw_portaudio::PaHostApiTypeId_paInDevelopment => HostApiType::InDevelopment,
+//      raw_portaudio::PaHostApiTypeId_paDirectSound => HostApiType::DirectSound,
+//      raw_portaudio::PaHostApiTypeId_paMME => HostApiType::MME,
+//      raw_portaudio::PaHostApiTypeId_paASIO => HostApiType::ASIO,
+//      raw_portaudio::PaHostApiTypeId_paSoundManager => HostApiType::SoundManager,
+//      raw_portaudio::PaHostApiTypeId_paCoreAudio => HostApiType::CoreAudio,
+//      raw_portaudio::PaHostApiTypeId_paOSS => HostApiType::OSS,
+//      raw_portaudio::PaHostApiTypeId_paALSA => HostApiType::ALSA,
+//      raw_portaudio::PaHostApiTypeId_paAL => HostApiType::AL,
+//      raw_portaudio::PaHostApiTypeId_paBeOS => HostApiType::BeOS,
+//      raw_portaudio::PaHostApiTypeId_paWDMKS => HostApiType::WDMKS,
+//      raw_portaudio::PaHostApiTypeId_paJACK => HostApiType::JACK,
+//      raw_portaudio::PaHostApiTypeId_paWASAPI => HostApiType::WASAPI,
+//      raw_portaudio::PaHostApiTypeId_paAudioScienceHPI => HostApiType::AudioScienceHPI,
+
       _ => HostApiType::Unknown,
     }
   }
@@ -336,7 +366,7 @@ bitflags!(
 
 bitflags!(
   #[doc="Flags used to control the behavior of a stream"]
-  flags StreamFlags: u64 {
+  flags PaStreamFlags: u64 {
     #[doc="Disable clipping of out of range samples"]
     const CLIP_OFF                                   = 0x00000001,
 
@@ -367,6 +397,16 @@ pub enum PaStreamCallbackResult {
 
   /// Stop invoking the callback and finish as soon as possible
   Abort = raw_portaudio::paAbort,
+
+
+//  /// Continue invoking the callback
+//  Continue = raw_portaudio::PaStreamCallbackResult_paContinue,
+//
+//  /// Stop invoking the callback and finish once everything has played
+//  Complete = raw_portaudio::PaStreamCallbackResult_paComplete,
+//
+//  /// Stop invoking the callback and finish as soon as possible
+//  Abort = raw_portaudio::PaStreamCallbackResult_paAbort,
 }
 
 
@@ -389,19 +429,5 @@ pub struct Stream<'a, I: SampleType, O: SampleType> {
   pub(crate) inputs: u32,
   pub(crate) outputs: u32,
   pub(crate) user_data: Box<StreamUserData<'a, I, O>>,
-}
-
-
-pub struct MemoryBlock {
-  pub(crate) inner: *mut ::std::os::raw::c_void
-}
-
-
-pub type RingBufferSizeT = i32;
-
-
-#[derive(Debug, Copy, Clone)]
-pub struct PaUtilRingBuffer {
-  pub(crate) inner: *mut raw_pa_ringbuffer::PaUtilRingBuffer
 }
 
