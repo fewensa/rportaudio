@@ -58,6 +58,7 @@ steps:
     commands:
       - cargo test -- --nocapture --exact
       - sh -f /root/.cargo/credentials
+      - export PA_LINK=false
       - cargo publish
 
 volumes:
