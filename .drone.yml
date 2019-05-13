@@ -81,7 +81,7 @@ steps:
     image: rust:1.33-slim
     privileged: true
     environment:
-      - RUST_BACKTRACE: 1
+      RUST_BACKTRACE: 1
     commands:
       - apt update -y
       - apt install -y cmake g++
